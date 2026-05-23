@@ -1,0 +1,45 @@
+{
+  "name": "legal-estate",
+  "version": "1.0.0",
+  "description": "Legal Estate Management System",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && PORT=3000 npm start",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test:setup": "node scripts/test-setup.js",
+    "test:env": "node scripts/test-env.js",
+    "test:dependencies": "node scripts/test-dependencies.js",
+    "test:db-connection": "node scripts/test-db-connection.js",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend-integration": "cd backend && npm run test:integration",
+    "test:backend-performance": "cd backend && npm run test:performance",
+    "test:backend-errors": "cd backend && npm run test:error-handling",
+    "test:frontend-components": "cd frontend && npm run test:components",
+    "test:frontend-integration": "cd frontend && npm run test:integration",
+    "test:coverage": "npm run test:backend-coverage && npm run test:frontend-coverage",
+    "test:backend-coverage": "cd backend && npm run test:coverage",
+    "test:frontend-coverage": "cd frontend && npm run test:coverage",
+    "test:all": "npm run test:setup && npm run test:env && npm run test:dependencies && npm run test:db-connection && npm run test:backend && npm run test:frontend",
+    "test:ci": "npm run test:setup && npm run test:backend-integration && cd frontend && npm run test:ci",
+    "test:performance": "npm run test:backend-performance",
+    "test:full-suite": "npm run test:all && npm run test:performance && npm run test:backend-errors",
+    "test:report": "node scripts/generate-test-report.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.11.0"
+  }
+}

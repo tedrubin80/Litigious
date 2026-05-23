@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Estate - Authentication Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .log-entry {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">🔧 Legal Estate Authentication Debug</h1>
+            
+            <!-- Environment Info -->
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                <h2 class="text-lg font-semibold mb-2">Environment Information</h2>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <strong>Current URL:</strong> <span id="currentUrl"></span>
+                    </div>
+                    <div>
+                        <strong>User Agent:</strong> <span id="userAgent"></span>
+                    </div>
+                    <div>
+                        <strong>API Base URL:</strong> <span id="apiBaseUrl"></span>
+                    </div>
+                    <div>
+                        <strong>Timestamp:</strong> <span id="timestamp"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connection Tests -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-4">Connection Tests</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="testHealthCheck()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors">
+                        Test Health Check
+                    </button>
+                    <button onclick="testBackendConnection()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors">
+                        Test Backend Connection
+                    </button>
+                    <button onclick="testCORS()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-colors">
+                        Test CORS
+                    </button>
+                    <button onclick="clearLogs()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors">
+                        Clear Logs
+                    </button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h2 class="text-lg font-semibold mb-4">Test Authentication</h2>
+                <form id="loginForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" value="admin@legalestate.tech" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="password" value="AdminLegalTech2024"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
+                            Test Login
+                        </button>
+                        <button type="button" onclick="testWithDifferentEndpoints()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
+                            Test All Endpoints
+                        </button>
+                        <button type="button" onclick="testStoredToken()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition-colors">
+                            Test Stored Token
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mb-6 p-4 bg-green-50 rounded-lg">
+                <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <button onclick="quickLogin('admin')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                        Admin Login
+                    </button>
+                    <button onclick="quickLogin('client')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                        Client Login
+                    </button>
+                    <button onclick="testDashboardAPI()" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                        Test Dashboard API
+                    </button>
+                    <button onclick="clearCache()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                        Clear Cache
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logs -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-2">Debug Logs</h2>
+                <div id="logs" class="bg-black text-green-400 p-4 rounded-lg h-64 overflow-y-auto log-entry">
+                    <div>🔧 Legal Estate Debug Console - Ready</div>
+                    <div>📅 Session started at: <span id="sessionStart"></span></div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div id="status" class="p-4 rounded-lg hidden">
+                <div id="statusContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'https://legalestate.tech/api';
+        const LOCAL_API_URL = 'http://localhost:3000/api';
+        
+        // Initialize
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('apiBaseUrl').textContent = API_BASE_URL;
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+        document.getElementById('sessionStart').textContent = new Date().toLocaleTimeString();
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-green-400',
+                success: 'text-green-300',
+                error: 'text-red-400',
+                warning: 'text-yellow-400'
+            };
+            const entry = `<div class="${colors[type] || 'text-green-400'}">[${timestamp}] ${message}</div>`;
+            logs.innerHTML += entry;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            const content = document.getElementById('statusContent');
+            const colors = {
+                success: 'bg-green-100 border-green-400 text-green-700',
+                error: 'bg-red-100 border-red-400 text-red-700',
+                warning: 'bg-yellow-100 border-yellow-400 text-yellow-700',
+                info: 'bg-blue-100 border-blue-400 text-blue-700'
+            };
+            
+            status.className = `p-4 rounded-lg border-l-4 ${colors[type] || colors.info}`;
+            content.textContent = message;
+            status.classList.remove('hidden');
+            
+            setTimeout(() => {
+                status.classList.add('hidden');
+            }, 5000);
+        }
+
+        async function makeRequest(url, options = {}) {
+            log(`🌐 Making request to: ${url}`);
+            log(`📤 Options: ${JSON.stringify(options, null, 2)}`);
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                log(`📥 Response Status: ${response.status} ${response.statusText}`);
+                log(`📥 Response Headers: ${JSON.stringify(Object.fromEntries(response.headers), null, 2)}`);
+                
+                const data = await response.text();
+                let jsonData;
+                try {
+                    jsonData = JSON.parse(data);
+                    log(`📄 Response Data: ${JSON.stringify(jsonData, null, 2)}`, 'success');
+                } catch (e) {
+                    log(`📄 Response Text: ${data}`, 'warning');
+                    jsonData = { text: data };
+                }
+                
+                return { response, data: jsonData, success: response.ok };
+            } catch (error) {
+                log(`❌ Request failed: ${error.message}`, 'error');
+                return { error, success: false };
+            }
+        }
+
+        async function testHealthCheck() {
+            log('🏥 Testing health check endpoint...');
+            const result = await makeRequest(`${API_BASE_URL}/monitoring/health`);
+            
+            if (result.success) {
+                showStatus('✅ Health check passed!', 'success');
+                log('✅ Backend is healthy', 'success');
+            } else {
+                showStatus('❌ Health check failed!', 'error');
+                log('❌ Backend health check failed', 'error');
+            }
+        }
+
+        async function testBackendConnection() {
+            log('🔗 Testing backend connection...');
+            
+            // Test multiple endpoints
+            const endpoints = [
+                `${API_BASE_URL}/monitoring/health`,
+                `${LOCAL_API_URL}/monitoring/health`,
+                `${API_BASE_URL}/auth/login`,
+                'https://legalestate.tech/'
+            ];
+            
+            for (const endpoint of endpoints) {
+                log(`🧪 Testing: ${endpoint}`);
+                const result = await makeRequest(endpoint, { method: 'GET' });
+                
+                if (result.success) {
+                    log(`✅ ${endpoint} - Connected`, 'success');
+                } else {
+                    log(`❌ ${endpoint} - Failed`, 'error');
+                }
+            }
+        }
+
+        async function testCORS() {
+            log('🌐 Testing CORS configuration...');
+            
+            const result = await makeRequest(`${API_BASE_URL}/monitoring/health`, {
+                method: 'GET',
+                headers: {
+                    'Origin': window.location.origin
+                }
+            });
+            
+            if (result.success) {
+                log('✅ CORS is properly configured', 'success');
+                showStatus('✅ CORS working correctly', 'success');
+            } else {
+                log('❌ CORS configuration issue', 'error');
+                showStatus('❌ CORS configuration problem', 'error');
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            log(`🔐 Testing login for: ${email}`);
+            
+            const result = await makeRequest(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+            
+            if (result.success && result.data.token) {
+                log('✅ Login successful!', 'success');
+                log(`🎫 Token: ${result.data.token}`, 'success');
+                
+                // Store token
+                localStorage.setItem('token', result.data.token);
+                localStorage.setItem('user', JSON.stringify(result.data.user));
+                
+                showStatus('✅ Login successful! Token stored.', 'success');
+                
+                // Test authenticated request
+                setTimeout(() => testDashboardAPI(), 1000);
+            } else {
+                log('❌ Login failed', 'error');
+                showStatus('❌ Login failed', 'error');
+            }
+        }
+
+        async function testWithDifferentEndpoints() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            log('🧪 Testing different auth endpoints...');
+            
+            const endpoints = [
+                '/auth/login',
+                '/auth/admin/login', 
+                '/auth/client/login'
+            ];
+            
+            for (const endpoint of endpoints) {
+                log(`🧪 Testing endpoint: ${endpoint}`);
+                const result = await makeRequest(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                if (result.success && result.data.token) {
+                    log(`✅ ${endpoint} - SUCCESS`, 'success');
+                } else {
+                    log(`❌ ${endpoint} - FAILED`, 'error');
+                }
+            }
+        }
+
+        async function testStoredToken() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                log('❌ No stored token found', 'error');
+                showStatus('❌ No stored token', 'error');
+                return;
+            }
+            
+            log('🎫 Testing stored token...');
+            
+            const result = await makeRequest(`${API_BASE_URL}/dashboard/overview`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (result.success) {
+                log('✅ Token is valid!', 'success');
+                showStatus('✅ Stored token works!', 'success');
+            } else {
+                log('❌ Token is invalid or expired', 'error');
+                showStatus('❌ Token invalid or expired', 'error');
+            }
+        }
+
+        async function quickLogin(type) {
+            let email, password;
+            
+            if (type === 'admin') {
+                email = 'admin@legalestate.tech';
+                password = 'AdminLegalTech2024';
+            } else {
+                email = 'admin@example.com';
+                password = 'admin123';
+            }
+            
+            log(`⚡ Quick ${type} login...`);
+            
+            const result = await makeRequest(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+            
+            if (result.success) {
+                localStorage.setItem('token', result.data.token);
+                localStorage.setItem('user', JSON.stringify(result.data.user));
+                log(`✅ Quick ${type} login successful!`, 'success');
+                showStatus(`✅ ${type} logged in successfully!`, 'success');
+            } else {
+                log(`❌ Quick ${type} login failed`, 'error');
+                showStatus(`❌ ${type} login failed`, 'error');
+            }
+        }
+
+        async function testDashboardAPI() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                log('❌ No token for dashboard test', 'error');
+                return;
+            }
+            
+            log('📊 Testing dashboard API...');
+            
+            const endpoints = [
+                '/dashboard/overview',
+                '/dashboard/recent-activity',
+                '/tasks/statistics'
+            ];
+            
+            for (const endpoint of endpoints) {
+                const result = await makeRequest(`${API_BASE_URL}${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (result.success) {
+                    log(`✅ ${endpoint} - Working`, 'success');
+                } else {
+                    log(`❌ ${endpoint} - Failed`, 'error');
+                }
+            }
+        }
+
+        function clearCache() {
+            localStorage.clear();
+            sessionStorage.clear();
+            log('🧹 Browser cache cleared', 'warning');
+            showStatus('🧹 Cache cleared', 'warning');
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '<div>🔧 Debug logs cleared</div>';
+        }
+
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            testLogin();
+        });
+
+        // Auto-run basic tests
+        setTimeout(() => {
+            log('🚀 Running automatic connection tests...');
+            testHealthCheck();
+        }, 1000);
+    </script>
+</body>
+</html>

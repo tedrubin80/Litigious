@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test</title>
+</head>
+<body>
+    <h1>Login Test Page</h1>
+    <div id="result"></div>
+    
+    <script>
+        // Test admin login
+        fetch('https://legalestate.tech/api/auth/admin/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: 'admin@legalestate.tech',
+                password: 'AdminLegalTech2024'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('result').innerHTML = `
+                <h2>Admin Login Result:</h2>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+                <p>Success: ${data.success ? '✅' : '❌'}</p>
+                ${data.token ? '<p>Token received: ✅</p>' : ''}
+            `;
+        })
+        .catch(error => {
+            document.getElementById('result').innerHTML = `
+                <h2>Error:</h2>
+                <pre>${error.toString()}</pre>
+            `;
+        });
+    </script>
+</body>
+</html>

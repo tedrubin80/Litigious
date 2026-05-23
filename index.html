@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Estate Management - Setup Required</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Legal Estate Management</h1>
+
+    <div class="warning">
+        <strong>Setup Required:</strong> The application needs to be built before deployment.
+    </div>
+
+    <h2>Deployment Instructions:</h2>
+
+    <ol>
+        <li>
+            <p>Build the frontend application on your local machine:</p>
+            <pre>cd frontend
+npm install
+npm run build</pre>
+        </li>
+        <li>
+            <p>Upload the contents of <code>frontend/build/</code> directory to your server's root directory</p>
+        </li>
+        <li>
+            <p>The app should then be accessible at your domain root</p>
+        </li>
+    </ol>
+
+    <p><strong>Note:</strong> Make sure to upload the <em>contents</em> of the build folder (index.html, static/, etc.), not the build folder itself.</p>
+</body>
+</html>

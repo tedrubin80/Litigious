@@ -1,0 +1,1303 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  ATTORNEY
+  PARALEGAL
+  ASSISTANT
+  CLIENT
+}
+
+enum CaseStatus {
+  INTAKE
+  CONSULTATION_SCHEDULED
+  CONSULTATION_COMPLETED
+  RETAINER_SIGNED
+  INVESTIGATION
+  DISCOVERY
+  ACTIVE
+  SETTLEMENT_NEGOTIATION
+  MEDIATION
+  ARBITRATION
+  LITIGATION
+  TRIAL_PREPARATION
+  TRIAL
+  POST_TRIAL
+  SETTLED
+  DISMISSED
+  CLOSED
+  ARCHIVED
+  ON_HOLD
+  REFERRED_OUT
+}
+
+enum CasePriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum CaseStage {
+  PRE_LITIGATION
+  LITIGATION
+  SETTLEMENT
+  TRIAL
+  POST_JUDGMENT
+  APPEAL
+  CLOSED
+}
+
+enum CaseSource {
+  REFERRAL_ATTORNEY
+  REFERRAL_CLIENT
+  REFERRAL_FRIEND
+  ONLINE_SEARCH
+  ADVERTISEMENT
+  SOCIAL_MEDIA
+  YELLOW_PAGES
+  DIRECT_MAIL
+  WALK_IN
+  RETURN_CLIENT
+  OTHER
+}
+
+enum TemplateType {
+  CASE_WORKFLOW
+  DOCUMENT_CHECKLIST
+  TASK_LIST
+  COMMUNICATION_TEMPLATE
+  SETTLEMENT_TEMPLATE
+}
+
+enum TaskTemplate {
+  INITIAL_CONSULTATION
+  RETAINER_AGREEMENT
+  MEDICAL_RECORDS_REQUEST
+  DEMAND_LETTER
+  SETTLEMENT_NEGOTIATION
+  TRIAL_PREPARATION
+  DOCUMENT_REVIEW
+  CLIENT_UPDATE
+}
+
+enum CaseType {
+  PERSONAL_INJURY
+  AUTO_ACCIDENT
+  MEDICAL_MALPRACTICE
+  WORKERS_COMP
+  PREMISES_LIABILITY
+  PRODUCT_LIABILITY
+  CONTRACT_DISPUTE
+  EMPLOYMENT_LAW
+  FAMILY_LAW
+  CRIMINAL_DEFENSE
+  ESTATE_PLANNING
+  REAL_ESTATE
+  BANKRUPTCY
+  BUSINESS_LAW
+  IMMIGRATION
+}
+
+enum SettlementStatus {
+  DRAFT
+  PROPOSED
+  NEGOTIATING
+  ACCEPTED
+  REJECTED
+  EXECUTED
+  PAID
+  CANCELLED
+}
+
+enum DocumentType {
+  CONTRACT
+  MEDICAL_RECORD
+  POLICE_REPORT
+  INSURANCE_DOCUMENT
+  PHOTO_EVIDENCE
+  CORRESPONDENCE
+  LEGAL_BRIEF
+  DEMAND_LETTER
+  SETTLEMENT_AGREEMENT
+  DISCOVERY_REQUEST
+  RETAINER_AGREEMENT
+  INVOICE
+  RECEIPT
+  WITNESS_STATEMENT
+  EXPERT_REPORT
+  COURT_FILING
+  OTHER
+}
+
+enum EventType {
+  COURT_DATE
+  DEPOSITION
+  MEDIATION
+  ARBITRATION
+  SETTLEMENT_CONFERENCE
+  CLIENT_MEETING
+  DEADLINE
+  STATUTE_DEADLINE
+  DISCOVERY_DEADLINE
+  TRIAL_DATE
+  APPEAL_DEADLINE
+  CONSULTATION
+  FOLLOW_UP
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+  PARTIAL_PAYMENT
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+  DOMESTIC_PARTNER
+}
+
+enum ContactMethod {
+  EMAIL
+  PHONE
+  TEXT
+  MAIL
+  IN_PERSON
+}
+
+enum CommunicationType {
+  EMAIL
+  PHONE
+  TEXT
+  MEETING
+  LETTER
+  VIDEO_CALL
+  VOICEMAIL
+  FAX
+  DOCUMENT_DELIVERY
+}
+
+enum CommunicationDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CommunicationStatus {
+  DRAFT
+  SENT
+  DELIVERED
+  READ
+  REPLIED
+  FAILED
+  SCHEDULED
+}
+
+model User {
+  id               String         @id @default(cuid())
+  email            String         @unique @db.VarChar(255)
+  password         String?        @db.VarChar(255)
+  name             String         @db.VarChar(255)
+  firstName        String?        @db.VarChar(100)
+  lastName         String?        @db.VarChar(100)
+  role             UserRole       @default(PARALEGAL)
+  isActive         Boolean        @default(true)
+  phone            String?        @db.VarChar(20)
+  address          String?        @db.Text
+  barNumber        String?        @unique @db.VarChar(50) // Attorney bar number
+  signature        String?        @db.VarChar(500) // Digital signature path
+  hourlyRate       Decimal?       @db.Decimal(8,2) // Default hourly rate
+  
+  // Password reset and email verification
+  emailVerified    Boolean        @default(false)
+  emailVerificationToken String?  @unique @db.VarChar(255)
+  passwordResetToken String?      @unique @db.VarChar(255)
+  passwordResetExpires DateTime?  @db.Timestamptz(6)
+  
+  // Account security
+  loginAttempts    Int            @default(0)
+  lockedUntil      DateTime?      @db.Timestamptz(6)
+  twoFactorSecret  String?        @db.VarChar(255) // For 2FA
+  twoFactorEnabled Boolean        @default(false)
+  
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  lastLogin        DateTime?      @db.Timestamptz(6)
+  
+  // Relations
+  assignedCases    Case[]         @relation("CaseAttorney")
+  paralegalCases   Case[]         @relation("CaseParalegal")
+  secondAttorneyCases Case[]      @relation("CaseSecondAttorney")
+  referredCases    Case[]         @relation("CaseReferringAttorney")
+  createdClients   Client[]       @relation("ClientCreator")
+  tasks            Task[]
+  timeEntries      TimeEntry[]
+  documents        Document[]
+  activities       Activity[]
+  caseActivities   CaseActivity[] @relation("CaseActivityUser")
+  notes            Note[]
+  settlements      Settlement[]
+  invoices         Invoice[]
+  calendarEvents   CalendarEvent[]
+  communications   Communication[]
+  communicationAttachments CommunicationAttachment[] @relation("CommunicationAttachmentUploader")
+  caseStatusHistory CaseStatusHistory[] @relation("CaseStatusHistoryUser")
+  completedDeadlines CaseDeadline[] @relation("CaseDeadlineCompletedBy")
+  caseValues       CaseValue[] @relation("CaseValueEnteredBy")
+  caseTemplates    CaseTemplate[] @relation("CaseTemplateCreator")
+  notifications    Notification[]
+  completedWorkflowSteps CaseWorkflowStep[] @relation("WorkflowStepCompletedBy")
+  
+  @@index([email])
+  @@index([role])
+  @@index([barNumber])
+  @@index([isActive])
+  @@index([createdAt])
+  @@index([lastLogin])
+  @@index([emailVerified])
+  @@index([passwordResetToken])
+  @@index([passwordResetExpires])
+  @@index([lockedUntil])
+}
+
+model Client {
+  id               String         @id @default(cuid())
+  firstName        String         @db.VarChar(100)
+  lastName         String         @db.VarChar(100)
+  email            String?        @db.VarChar(255)
+  phone            String?        @db.VarChar(20)
+  address          String?        @db.VarChar(500)
+  city             String?        @db.VarChar(100)
+  state            String?        @db.VarChar(2)
+  zipCode          String?        @db.VarChar(10)
+  dateOfBirth      DateTime?      @db.Date
+  ssn              String?        @db.VarChar(11) // Encrypted format: XXX-XX-XXXX
+  emergencyContact String?        @db.VarChar(255)
+  emergencyPhone   String?        @db.VarChar(20)
+  notes            String?        @db.Text
+  source           String?        @db.VarChar(100) // How they found the firm
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  createdById      String
+  
+  // Enhanced client information
+  mobile           String?        @db.VarChar(20)
+  workPhone        String?        @db.VarChar(20)
+  employer         String?        @db.VarChar(200)
+  occupation       String?        @db.VarChar(100)
+  maritalStatus    MaritalStatus  @default(SINGLE)
+  spouseName       String?        @db.VarChar(200)
+  preferredContact ContactMethod  @default(EMAIL)
+  isActive         Boolean        @default(true)
+  clientNumber     String?        @unique @db.VarChar(20) // Auto-generated: CL20250001
+
+  // Relations
+  createdBy        User           @relation("ClientCreator", fields: [createdById], references: [id])
+  cases            Case[]
+  communications   Communication[]
+  documents        Document[]
+  emergencyContacts EmergencyContact[]
+  tasks            Task[]
+  calendarEvents   CalendarEvent[]
+  invoices         Invoice[]
+  
+  @@index([email])
+  @@index([lastName, firstName])
+  @@index([state])
+  @@index([zipCode])
+  @@index([source])
+  @@index([createdAt])
+  @@index([createdById])
+  
+  // Constraints
+  @@map("clients")
+}
+
+model EmergencyContact {
+  id           String         @id @default(cuid())
+  firstName    String         @db.VarChar(100)
+  lastName     String         @db.VarChar(100)
+  relationship String         @db.VarChar(100) // Spouse, Parent, Child, Sibling, Friend, etc.
+  phone        String?        @db.VarChar(20)
+  email        String?        @db.VarChar(255)
+  address      String?        @db.VarChar(500)
+  isPrimary    Boolean        @default(false)
+  clientId     String
+  createdAt    DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime       @updatedAt @db.Timestamptz(6)
+  
+  // Relations
+  client       Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@map("emergency_contacts")
+}
+
+model Case {
+  id               String         @id @default(cuid())
+  caseNumber       String         @unique @db.VarChar(50) // Auto-generated: CS20250001
+  title            String         @db.VarChar(500)
+  description      String?        @db.Text
+  type             CaseType
+  status           CaseStatus     @default(INTAKE)
+  priority         CasePriority   @default(MEDIUM)
+  stage            CaseStage      @default(PRE_LITIGATION)
+  source           CaseSource?    // How case was acquired
+  
+  // Key Dates for Lifecycle Tracking
+  dateOpened       DateTime       @default(now()) @db.Date
+  consultationDate DateTime?      @db.Date
+  retainerSignedDate DateTime?    @db.Date
+  discoveryStartDate DateTime?    @db.Date
+  discoveryEndDate DateTime?      @db.Date
+  mediationDate    DateTime?      @db.Date
+  trialDate        DateTime?      @db.Date
+  settlementDate   DateTime?      @db.Date
+  dateClosed       DateTime?      @db.Date
+  
+  // Statute and Deadlines
+  statute          DateTime?      @db.Date // Statute of limitations
+  nextDeadline     DateTime?      @db.Date // Next important deadline
+  deadlineDescription String?     @db.VarChar(500) // What the deadline is for
+  
+  // Case Team
+  clientId         String
+  attorneyId       String?        // Primary attorney
+  paralegalId      String?        // Primary paralegal
+  secondAttorneyId String?        // Co-counsel
+  referringAttorneyId String?     // Attorney who referred the case
+  
+  // Case Value and Settlement Information
+  estimatedValue   Decimal?       @db.Decimal(12,2) // Estimated case value
+  demandAmount     Decimal?       @db.Decimal(12,2) // Demand amount
+  settlementAmount Decimal?       @db.Decimal(12,2) // Final settlement
+  attorneyFees     Decimal?       @db.Decimal(12,2)
+  costs            Decimal?       @db.Decimal(12,2)
+  netToClient      Decimal?       @db.Decimal(12,2)
+  contingencyRate  Decimal?       @db.Decimal(5,2) // Contingency percentage
+  
+  // Case Progress and Metrics
+  hoursWorked      Decimal?       @default(0) @db.Decimal(8,2)
+  totalBilled      Decimal?       @default(0) @db.Decimal(12,2)
+  costsIncurred    Decimal?       @default(0) @db.Decimal(12,2)
+  
+  // Administrative
+  isActive         Boolean        @default(true)
+  isArchived       Boolean        @default(false)
+  internalNotes    String?        @db.Text // Private notes for internal use
+  clientInstructions String?      @db.Text // Special client instructions
+  
+  // Workflow and Templates
+  workflowTemplate String?        @db.VarChar(100) // Template used for case workflow
+  customFields     Json?          @db.JsonB // Custom fields for specific case types
+  
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  
+  // Relations  
+  client           Client         @relation(fields: [clientId], references: [id])
+  attorney         User?          @relation("CaseAttorney", fields: [attorneyId], references: [id])
+  paralegal        User?          @relation("CaseParalegal", fields: [paralegalId], references: [id])
+  secondAttorney   User?          @relation("CaseSecondAttorney", fields: [secondAttorneyId], references: [id])
+  referringAttorney User?         @relation("CaseReferringAttorney", fields: [referringAttorneyId], references: [id])
+  
+  incidents        Incident[]
+  medicalRecords   MedicalRecord[]
+  medicalProviders MedicalProvider[]
+  insurance        Insurance[]
+  documents        Document[]
+  tasks            Task[]
+  timeEntries      TimeEntry[]
+  notes            Note[]
+  communications   Communication[]
+  expenses         Expense[]
+  settlements      Settlement[]
+  calendarEvents   CalendarEvent[]
+  invoices         Invoice[]
+  caseStatusHistory CaseStatusHistory[]
+  caseDeadlines    CaseDeadline[]
+  caseValues       CaseValue[]
+  template         CaseTemplate? @relation("CaseTemplate", fields: [workflowTemplate], references: [id])
+  workflowSteps    CaseWorkflowStep[]
+  caseActivities   CaseActivity[]
+  
+  @@index([caseNumber])
+  @@index([status])
+  @@index([type])
+  @@index([priority])
+  @@index([stage])
+  @@index([source])
+  @@index([dateOpened])
+  @@index([statute])
+  @@index([nextDeadline])
+  @@index([clientId])
+  @@index([attorneyId])
+  @@index([paralegalId])
+  @@index([secondAttorneyId])
+  @@index([referringAttorneyId])
+  @@index([dateClosed])
+  @@index([isActive])
+  @@index([isArchived])
+  @@index([status, type])
+  @@index([status, priority])
+  @@index([stage, status])
+  @@index([nextDeadline, status])
+  @@index([createdAt])
+  
+  @@map("cases")
+}
+
+model CaseStatusHistory {
+  id               String         @id @default(cuid())
+  caseId           String
+  fromStatus       CaseStatus?    // Previous status (null for initial status)
+  toStatus         CaseStatus     // New status
+  changedAt        DateTime       @default(now()) @db.Timestamptz(6)
+  changedById      String
+  reason           String?        @db.VarChar(500) // Reason for status change
+  notes            String?        @db.Text
+  
+  // Relations
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  changedBy        User           @relation("CaseStatusHistoryUser", fields: [changedById], references: [id])
+  
+  @@index([caseId])
+  @@index([toStatus])
+  @@index([changedAt])
+  @@index([changedById])
+  @@map("case_status_history")
+}
+
+model CaseDeadline {
+  id               String         @id @default(cuid())
+  caseId           String
+  title            String         @db.VarChar(300)
+  description      String?        @db.Text
+  dueDate          DateTime       @db.Date
+  type             String         @db.VarChar(100) // STATUTE, DISCOVERY, FILING, TRIAL, etc.
+  priority         CasePriority   @default(MEDIUM)
+  isStatutory      Boolean        @default(false) // True for statute of limitations, etc.
+  reminderDays     Int[]          @default([7, 1]) // Days before deadline to send reminders
+  completed        Boolean        @default(false)
+  completedAt      DateTime?      @db.Timestamptz(6)
+  completedById    String?
+  
+  // Relations
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  completedBy      User?          @relation("CaseDeadlineCompletedBy", fields: [completedById], references: [id])
+  
+  @@index([caseId])
+  @@index([dueDate])
+  @@index([type])
+  @@index([priority])
+  @@index([completed])
+  @@index([isStatutory])
+  @@index([dueDate, completed])
+  @@map("case_deadlines")
+}
+
+model CaseValue {
+  id               String         @id @default(cuid())
+  caseId           String
+  valueType        String         @db.VarChar(50) // INITIAL_ESTIMATE, DEMAND, OFFER, SETTLEMENT, etc.
+  amount           Decimal        @db.Decimal(12,2)
+  description      String?        @db.VarChar(500)
+  date             DateTime       @default(now()) @db.Date
+  enteredById      String
+  isActive         Boolean        @default(true) // Only one active value per type
+  
+  // Relations
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  enteredBy        User           @relation("CaseValueEnteredBy", fields: [enteredById], references: [id])
+  
+  @@index([caseId])
+  @@index([valueType])
+  @@index([date])
+  @@index([isActive])
+  @@index([caseId, valueType, isActive])
+  @@map("case_values")
+}
+
+model Incident {
+  id               String         @id @default(cuid())
+  caseId           String
+  dateOfIncident   DateTime       @db.Date
+  timeOfIncident   String?        @db.VarChar(20)
+  location         String         @db.VarChar(500)
+  description      String         @db.Text
+  policeReport     String?        @db.VarChar(10)
+  policeReportNum  String?        @db.VarChar(100)
+  weatherConditions String?       @db.VarChar(200)
+  witnesses        Json?          @db.JsonB // Array of witness objects
+  photos           String[]       @db.VarChar(500) // Array of photo URLs
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  @@index([caseId])
+  @@index([dateOfIncident])
+  
+  @@map("incidents")
+}
+
+model MedicalProvider {
+  id               String         @id @default(cuid())
+  name             String
+  type             String         // Hospital, Clinic, Doctor, etc.
+  address          String?
+  phone            String?
+  fax              String?
+  email            String?
+  contactPerson    String?
+  createdAt        DateTime       @default(now())
+  
+  cases            Case[]
+  medicalRecords   MedicalRecord[]
+  
+  @@index([name])
+}
+
+model MedicalRecord {
+  id               String         @id @default(cuid())
+  caseId           String
+  providerId       String
+  dateOfService    DateTime
+  typeOfService    String
+  description      String?
+  cost             Decimal?
+  requested        Boolean        @default(false)
+  received         Boolean        @default(false)
+  dateRequested    DateTime?
+  dateReceived     DateTime?
+  documentUrl      String?
+  notes            String?
+  createdAt        DateTime       @default(now())
+  
+  case             Case           @relation(fields: [caseId], references: [id])
+  provider         MedicalProvider @relation(fields: [providerId], references: [id])
+  
+  @@index([caseId])
+  @@index([providerId])
+}
+
+model Insurance {
+  id               String         @id @default(cuid())
+  caseId           String
+  company          String
+  policyNumber     String?
+  adjusterName     String?
+  adjusterPhone    String?
+  adjusterEmail    String?
+  policyLimits     String?
+  type             String         // Auto, Health, Property, etc.
+  isOwnInsurance   Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  
+  case             Case           @relation(fields: [caseId], references: [id])
+  
+  @@index([caseId])
+}
+
+model Document {
+  id               String         @id @default(cuid())
+  title            String
+  filename         String?
+  originalName     String?
+  fileType         String?
+  fileSize         Int?
+  filePath         String?
+  type             DocumentType   @default(OTHER)
+  content          String?        // For AI-generated documents
+  description      String?
+  
+  // Activity tracking
+  viewCount        Int            @default(0)
+  lastViewed       DateTime?      @db.Timestamptz(6)
+  lastViewedBy     String?
+  downloadCount    Int            @default(0)
+  lastDownload     DateTime?      @db.Timestamptz(6)
+  
+  caseId           String?
+  clientId         String?
+  uploadedBy       String
+  generatedBy      String?        // AI, TEMPLATE, MANUAL
+  aiProvider       String?        // OpenAI, Anthropic, etc.
+  metadata         Json?          // Additional metadata
+  version          Int            @default(1)
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  case             Case?          @relation(fields: [caseId], references: [id])
+  client           Client?        @relation(fields: [clientId], references: [id])
+  user             User           @relation(fields: [uploadedBy], references: [id])
+  
+  @@index([caseId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([lastViewed])
+  @@index([viewCount])
+}
+
+model Task {
+  id               String         @id @default(cuid())
+  title            String
+  description      String?
+  dueDate          DateTime?
+  priority         String         @default("MEDIUM") // HIGH, MEDIUM, LOW
+  status           String         @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  caseId           String?
+  clientId         String?
+  assignedToId     String
+  createdById      String
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  case             Case?          @relation(fields: [caseId], references: [id])
+  client           Client?        @relation(fields: [clientId], references: [id])
+  assignedTo       User           @relation(fields: [assignedToId], references: [id])
+  
+  @@index([assignedToId])
+  @@index([dueDate])
+  @@index([status])
+}
+
+model TimeEntry {
+  id               String         @id @default(cuid())
+  description      String
+  hours            Decimal
+  rate             Decimal
+  amount           Decimal
+  date             DateTime
+  billable         Boolean        @default(true)
+  billed           Boolean        @default(false)
+  
+  // Auto-tracking fields
+  isAutoTracked    Boolean        @default(false)
+  activityType     String?
+  sourceType       String?
+  sourceId         String?
+  metadata         Json?
+  
+  caseId           String?
+  userId           String
+  createdAt        DateTime       @default(now())
+  
+  case             Case?          @relation(fields: [caseId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
+  invoiceLineItems InvoiceLineItem[]
+  
+  @@index([userId])
+  @@index([caseId])
+  @@index([date])
+  @@index([billable])
+  @@index([billed])
+  @@index([isAutoTracked])
+}
+
+model Communication {
+  id               String                @id @default(cuid())
+  type             CommunicationType
+  direction        CommunicationDirection
+  status           CommunicationStatus   @default(SENT)
+  subject          String?               @db.VarChar(500)
+  content          String?               @db.Text
+  summary          String?               @db.VarChar(1000) // AI-generated summary
+  dateTime         DateTime
+  duration         Int?                  // Duration in minutes for calls/meetings
+  followUpRequired Boolean               @default(false)
+  followUpDate     DateTime?
+  priority         String?               @default("NORMAL") // HIGH, NORMAL, LOW
+  
+  // Contact information
+  fromEmail        String?               @db.VarChar(255)
+  toEmails         String[]              // Array of email addresses
+  fromPhone        String?               @db.VarChar(20)
+  toPhone          String?               @db.VarChar(20)
+  
+  // Metadata
+  attachmentCount  Int                   @default(0)
+  isConfidential   Boolean               @default(false)
+  billable         Boolean               @default(true)
+  billingNotes     String?               @db.VarChar(500)
+  
+  // Relationships
+  caseId           String?
+  clientId         String?
+  userId           String                // User who logged the communication
+  createdAt        DateTime              @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime              @updatedAt @db.Timestamptz(6)
+  
+  // Relations
+  case             Case?                 @relation(fields: [caseId], references: [id])
+  client           Client?               @relation(fields: [clientId], references: [id])
+  user             User                  @relation(fields: [userId], references: [id])
+  attachments      CommunicationAttachment[]
+  
+  @@index([caseId])
+  @@index([clientId])
+  @@index([userId])
+  @@index([type])
+  @@index([dateTime])
+  @@index([status])
+  @@index([followUpRequired, followUpDate])
+  @@map("communications")
+}
+
+model CommunicationAttachment {
+  id               String         @id @default(cuid())
+  fileName         String         @db.VarChar(255)
+  originalName     String         @db.VarChar(255)
+  mimeType         String         @db.VarChar(100)
+  fileSize         Int
+  filePath         String         @db.VarChar(500)
+  isConfidential   Boolean        @default(false)
+  communicationId  String
+  uploadedBy       String
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  communication    Communication  @relation(fields: [communicationId], references: [id], onDelete: Cascade)
+  user             User           @relation("CommunicationAttachmentUploader", fields: [uploadedBy], references: [id])
+  
+  @@index([communicationId])
+  @@map("communication_attachments")
+}
+
+model Note {
+  id               String         @id @default(cuid())
+  content          String
+  isPrivate        Boolean        @default(false)
+  caseId           String?
+  createdById      String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  case             Case?          @relation(fields: [caseId], references: [id])
+  createdBy        User           @relation(fields: [createdById], references: [id])
+  
+  @@index([caseId])
+}
+
+model Expense {
+  id               String         @id @default(cuid())
+  description      String
+  amount           Decimal
+  category         String
+  date             DateTime
+  receipt          String?        // File path to receipt
+  reimbursable     Boolean        @default(true)
+  reimbursed       Boolean        @default(false)
+  caseId           String?
+  createdAt        DateTime       @default(now())
+  
+  case             Case?          @relation(fields: [caseId], references: [id])
+  invoiceLineItems InvoiceLineItem[]
+  
+  @@index([caseId])
+  @@index([date])
+  @@index([reimbursed])
+}
+
+// Enhanced Activity Tracking Enums
+enum ActivityType {
+  // Document Activities
+  DOCUMENT_UPLOAD
+  DOCUMENT_VIEW
+  DOCUMENT_EDIT
+  DOCUMENT_DOWNLOAD
+  DOCUMENT_SHARE
+  DOCUMENT_REVIEW
+  
+  // Communication Activities
+  EMAIL_SENT
+  EMAIL_RECEIVED
+  PHONE_CALL_MADE
+  PHONE_CALL_RECEIVED
+  VIDEO_MEETING_CREATED
+  VIDEO_MEETING_JOINED
+  VIDEO_MEETING_ENDED
+  CLIENT_MEETING
+  
+  // Case Management
+  CASE_CREATED
+  CASE_UPDATED
+  CASE_STATUS_CHANGED
+  CASE_ASSIGNED
+  CASE_TRANSFERRED
+  
+  // Legal Work
+  LEGAL_RESEARCH
+  DOCUMENT_DRAFTING
+  CONTRACT_REVIEW
+  COURT_FILING
+  DEPOSITION_PREP
+  
+  // Medical Records
+  MEDICAL_RECORD_REQUEST
+  MEDICAL_RECORD_RECEIVED
+  MEDICAL_RECORD_REVIEWED
+  
+  // Task Management
+  TASK_CREATED
+  TASK_COMPLETED
+  TASK_ASSIGNED
+  
+  // Time & Billing
+  TIME_ENTRY_CREATED
+  EXPENSE_ADDED
+  INVOICE_GENERATED
+  
+  // System Activities
+  LOGIN
+  LOGOUT
+  SYSTEM_ACCESS
+}
+
+model Activity {
+  id               String         @id @default(cuid())
+  action           String
+  description      String
+  entityType       String         // CASE, CLIENT, DOCUMENT, etc.
+  entityId         String
+  userId           String
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime       @default(now())
+  
+  user             User           @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model CaseActivity {
+  id               String         @id @default(cuid())
+  caseId           String
+  userId           String
+  activityType     ActivityType
+  action           String         // Descriptive action name
+  description      String?        // Auto-generated description
+  
+  // Time tracking
+  startTime        DateTime       @default(now()) @db.Timestamptz(6)
+  endTime          DateTime?      @db.Timestamptz(6)
+  duration         Int?           // Duration in minutes
+  isBillable       Boolean        @default(true)
+  hourlyRate       Decimal?       @db.Decimal(10,2)
+  billingAmount    Decimal?       @db.Decimal(12,2)
+  
+  // Metadata
+  entityType       String?        // DOCUMENT, MEETING, EMAIL, etc.
+  entityId         String?        // ID of related entity
+  metadata         Json?          @db.JsonB // Additional context data
+  ipAddress        String?        @db.VarChar(45)
+  userAgent        String?        @db.Text
+  location         String?        @db.VarChar(100) // Office location or remote
+  
+  // Status
+  isBilled         Boolean        @default(false)
+  billingDate      DateTime?      @db.Timestamptz(6)
+  invoiceId        String?
+  
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  
+  // Relations
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user             User           @relation("CaseActivityUser", fields: [userId], references: [id])
+  
+  @@index([caseId])
+  @@index([userId])
+  @@index([activityType])
+  @@index([startTime])
+  @@index([isBillable])
+  @@index([isBilled])
+  @@index([caseId, activityType])
+  @@index([userId, startTime])
+  @@index([startTime, isBillable])
+  
+  @@map("case_activities")
+}
+
+model Settlement {
+  id               String         @id @default(cuid())
+  caseId           String
+  amount           Decimal        @db.Decimal(12,2)
+  status           SettlementStatus @default(DRAFT)
+  proposedDate     DateTime?      @db.Date
+  acceptedDate     DateTime?      @db.Date
+  executedDate     DateTime?      @db.Date
+  paidDate         DateTime?      @db.Date
+  
+  // Fee breakdown
+  attorneyFees     Decimal?       @db.Decimal(12,2)
+  costs            Decimal?       @db.Decimal(12,2)
+  netToClient      Decimal?       @db.Decimal(12,2)
+  attorneyPercent  Decimal?       @db.Decimal(5,2) // Contingency percentage
+  
+  // Payment terms
+  paymentTerms     String?        @db.Text
+  paymentSchedule  Json?          @db.JsonB // Payment schedule if installments
+  
+  // Parties and contacts
+  settlor          String?        @db.VarChar(255) // Who is paying the settlement
+  payorContact     String?        @db.VarChar(255)
+  payorPhone       String?        @db.VarChar(20)
+  payorEmail       String?        @db.VarChar(255)
+  
+  // Settlement details
+  description      String?        @db.Text
+  conditions       String?        @db.Text // Special conditions
+  confidential     Boolean        @default(false)
+  releases         Json?          @db.JsonB // What is being released
+  
+  // Documents
+  demandLetterSent Boolean        @default(false)
+  agreementSigned  Boolean        @default(false)
+  releasesSigned   Boolean        @default(false)
+  
+  // Tracking
+  negotiatedById   String
+  approvedById     String?
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  
+  // Relations
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  negotiatedBy     User           @relation(fields: [negotiatedById], references: [id])
+  
+  @@index([caseId])
+  @@index([status])
+  @@index([amount])
+  @@index([proposedDate])
+  @@index([paidDate])
+  @@index([negotiatedById])
+  
+  @@map("settlements")
+}
+
+model CalendarEvent {
+  id               String         @id @default(cuid())
+  title            String         @db.VarChar(500)
+  description      String?        @db.Text
+  type             EventType
+  startDate        DateTime       @db.Date
+  endDate          DateTime?      @db.Date
+  startTime        String?        @db.VarChar(20)
+  endTime          String?        @db.VarChar(20)
+  allDay           Boolean        @default(false)
+  location         String?        @db.VarChar(500)
+  
+  // Case and client relations
+  caseId           String?
+  clientId         String?
+  
+  // Participants
+  createdById      String
+  assignedToId     String?
+  attendees        Json?          // Array of attendee objects
+  
+  // Court-specific fields
+  judgeId          String?
+  courtroom        String?        @db.VarChar(50)
+  caseNumber       String?        @db.VarChar(50)
+  
+  // Reminders and notifications
+  reminderSent     Boolean        @default(false)
+  reminderTime     Int?           // Minutes before event
+  
+  // Status and completion
+  completed        Boolean        @default(false)
+  cancelled        Boolean        @default(false)
+  rescheduled      Boolean        @default(false)
+  originalEventId  String?        // If rescheduled, reference to original
+  
+  // Recurring events
+  isRecurring      Boolean        @default(false)
+  recurringRule    Json?          @db.JsonB // RRULE for recurring events
+  parentEventId    String?        // For recurring event instances
+  
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  
+  // Relations
+  case             Case?          @relation(fields: [caseId], references: [id])
+  client           Client?        @relation(fields: [clientId], references: [id])
+  createdBy        User           @relation(fields: [createdById], references: [id])
+  
+  @@index([startDate])
+  @@index([type])
+  @@index([caseId])
+  @@index([createdById])
+  @@index([assignedToId])
+  @@index([completed])
+  @@index([cancelled])
+  @@index([startDate, type])
+  
+  @@map("calendar_events")
+}
+
+model Invoice {
+  id               String         @id @default(cuid())
+  invoiceNumber    String         @unique @db.VarChar(50)
+  clientId         String?
+  caseId           String?
+  
+  // Invoice details
+  issueDate        DateTime       @default(now()) @db.Date
+  dueDate          DateTime       @db.Date
+  paidDate         DateTime?      @db.Date
+  status           InvoiceStatus  @default(DRAFT)
+  
+  // Amounts
+  subtotal         Decimal        @db.Decimal(12,2)
+  taxRate          Decimal?       @default(0) @db.Decimal(5,4)
+  taxAmount        Decimal?       @default(0) @db.Decimal(12,2)
+  totalAmount      Decimal        @db.Decimal(12,2)
+  paidAmount       Decimal?       @default(0) @db.Decimal(12,2)
+  balanceDue       Decimal?       @db.Decimal(12,2)
+  
+  // Payment details
+  paymentMethod    String?        @db.VarChar(100)
+  paymentReference String?        @db.VarChar(255)
+  
+  // Invoice content
+  description      String?        @db.Text
+  notes            String?        @db.Text
+  terms            String?        @db.Text
+  
+  // Relations and tracking
+  createdById      String
+  sentToClient     Boolean        @default(false)
+  sentDate         DateTime?      @db.Timestamptz(6)
+  
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  
+  // Relations
+  case             Case?          @relation(fields: [caseId], references: [id])
+  client           Client?        @relation(fields: [clientId], references: [id])
+  createdBy        User           @relation(fields: [createdById], references: [id])
+  
+  // Invoice line items
+  lineItems        InvoiceLineItem[]
+  
+  @@index([invoiceNumber])
+  @@index([status])
+  @@index([dueDate])
+  @@index([caseId])
+  @@index([clientId])
+  @@index([issueDate])
+  @@index([paidDate])
+  @@index([createdById])
+  @@index([status, dueDate])
+  
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id               String         @id @default(cuid())
+  invoiceId        String
+  
+  // Line item details
+  description      String         @db.VarChar(500)
+  quantity         Decimal        @default(1) @db.Decimal(10,4)
+  rate             Decimal        @db.Decimal(10,2)
+  amount           Decimal        @db.Decimal(12,2)
+  
+  // Time tracking reference
+  timeEntryId      String?
+  
+  // Expense reference  
+  expenseId        String?
+  
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  invoice          Invoice        @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  timeEntry        TimeEntry?     @relation(fields: [timeEntryId], references: [id])
+  expense          Expense?       @relation(fields: [expenseId], references: [id])
+  
+  @@index([invoiceId])
+  @@index([timeEntryId])
+  @@index([expenseId])
+  
+  @@map("invoice_line_items")
+}
+
+model CaseTemplate {
+  id               String       @id @default(cuid())
+  name             String       @db.VarChar(200)
+  description      String?      @db.Text
+  caseType         CaseType     // What type of cases this template applies to
+  templateType     TemplateType
+  isActive         Boolean      @default(true)
+  isDefault        Boolean      @default(false) // Default template for this case type
+  
+  // Template configuration
+  defaultStatus    CaseStatus   @default(INTAKE)
+  defaultPriority  CasePriority @default(MEDIUM)
+  defaultStage     CaseStage    @default(PRE_LITIGATION)
+  
+  // Template data
+  workflowSteps    Json?        @db.JsonB // Ordered list of workflow steps
+  taskTemplates    Json?        @db.JsonB // Default tasks to create
+  deadlineTemplates Json?       @db.JsonB // Default deadlines
+  documentTemplates Json?       @db.JsonB // Required documents checklist
+  communicationTemplates Json?  @db.JsonB // Communication templates
+  
+  // Metadata
+  createdById      String
+  createdAt        DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime     @updatedAt @db.Timestamptz(6)
+  
+  // Relations
+  createdBy        User         @relation("CaseTemplateCreator", fields: [createdById], references: [id])
+  cases            Case[]       @relation("CaseTemplate")
+  CaseWorkflowStep CaseWorkflowStep[]
+  CaseTemplateTask CaseTemplateTask[]
+  
+  @@index([caseType])
+  @@index([templateType])
+  @@index([isActive])
+  @@index([isDefault])
+  @@index([caseType, isDefault])
+  @@map("case_templates")
+}
+
+model CaseWorkflowStep {
+  id               String       @id @default(cuid())
+  templateId       String?      // If part of a template
+  caseId           String?      // If specific to a case
+  
+  name             String       @db.VarChar(200)
+  description      String?      @db.Text
+  stepOrder        Int          // Order in the workflow
+  estimatedDays    Int?         // Estimated days to complete
+  
+  // Dependencies
+  prerequisiteSteps Json?       @db.JsonB // IDs of steps that must be completed first
+  
+  // Auto-generation rules
+  autoCreateTasks  Boolean      @default(false)
+  autoCreateDeadlines Boolean   @default(false)
+  autoCreateDocuments Boolean   @default(false)
+  
+  // Task generation
+  taskTemplate     TaskTemplate?
+  taskTitle        String?      @db.VarChar(200)
+  taskDescription  String?      @db.Text
+  taskDueDays      Int?         // Days from case creation or previous step
+  
+  // Status tracking
+  isCompleted      Boolean      @default(false)
+  completedAt      DateTime?    @db.Timestamptz(6)
+  completedById    String?
+  
+  createdAt        DateTime     @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  template         CaseTemplate? @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  case             Case?         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  completedBy      User?         @relation("WorkflowStepCompletedBy", fields: [completedById], references: [id])
+  
+  @@index([templateId])
+  @@index([caseId])
+  @@index([stepOrder])
+  @@index([isCompleted])
+  @@index([caseId, stepOrder])
+  @@map("case_workflow_steps")
+}
+
+model CaseTemplateTask {
+  id               String       @id @default(cuid())
+  templateId       String
+  
+  title            String       @db.VarChar(200)
+  description      String?      @db.Text
+  taskType         TaskTemplate
+  priority         String       @default("MEDIUM") // HIGH, MEDIUM, LOW
+  estimatedHours   Decimal?     @db.Decimal(5,2)
+  
+  // Timing
+  dueDaysFromStart Int?         // Days from case creation
+  dueDaysFromStep  String?      // Days from specific workflow step completion
+  
+  // Assignment
+  assignToRole     UserRole?    // Auto-assign based on role
+  assignToField    String?      // Auto-assign based on case field (attorneyId, paralegalId)
+  
+  // Dependencies
+  prerequisiteTasks Json?       @db.JsonB // Other template tasks that must be completed first
+  
+  templateOrder    Int          @default(0)
+  isRequired       Boolean      @default(true)
+  
+  createdAt        DateTime     @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  template         CaseTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  
+  @@index([templateId])
+  @@index([taskType])
+  @@index([templateOrder])
+  @@map("case_template_tasks")
+}
+
+model Notification {
+  id           String            @id @default(cuid())
+  type         String            @db.VarChar(50)  // DEADLINE_REMINDER, APPOINTMENT_REMINDER, etc.
+  title        String            @db.VarChar(200)
+  message      String            @db.Text
+  userId       String
+  entityType   String?           @db.VarChar(50)  // CASE, CLIENT, DEADLINE, etc.
+  entityId     String?
+  isRead       Boolean           @default(false)
+  readAt       DateTime?         @db.Timestamptz(6)
+  scheduledFor DateTime?         @db.Timestamptz(6) // For scheduled notifications
+  status       String            @default("PENDING") // PENDING, SENT, FAILED
+  metadata     Json?             @db.JsonB
+  createdAt    DateTime          @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+  @@index([isRead])
+  @@index([scheduledFor])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@map("notifications")
+}
+
+model AiProviderConfig {
+  id          String    @id @default(cuid())
+  provider    String    @unique @db.VarChar(50)  // openai, anthropic, google, cohere
+  apiKey      String?   @db.Text  // Encrypted API key
+  model       String?   @db.VarChar(100)  // Preferred model for this provider
+  enabled     Boolean   @default(false)
+  lastTested  DateTime? @db.Timestamptz(6)  // When the connection was last tested
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(6)
+  
+  @@index([provider])
+  @@map("ai_provider_configs")
+}

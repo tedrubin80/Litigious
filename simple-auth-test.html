@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Auth Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        #output { background: #f5f5f5; padding: 15px; margin-top: 20px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Simple Authentication Test</h1>
+    <p>This tests the basic auth functionality without React complexity.</p>
+    
+    <div>
+        <button onclick="testLocal()">Test Local API</button>
+        <button onclick="testProduction()">Test Production API</button>
+        <button onclick="testDirect()">Test Direct Connection</button>
+        <button onclick="clearOutput()">Clear</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+        }
+
+        async function testAuth(apiUrl, label) {
+            log(`🧪 Testing ${label}: ${apiUrl}`, 'info');
+            
+            try {
+                // Test health check first
+                log(`📡 Testing health endpoint...`, 'info');
+                const healthResponse = await fetch(`${apiUrl}/monitoring/health`);
+                log(`📡 Health Status: ${healthResponse.status}`, healthResponse.ok ? 'success' : 'error');
+                
+                if (healthResponse.ok) {
+                    const healthData = await healthResponse.json();
+                    log(`📡 Health Data: ${JSON.stringify(healthData)}`, 'success');
+                }
+
+                // Test authentication
+                log(`🔐 Testing authentication...`, 'info');
+                const authResponse = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@legalestate.tech',
+                        password: 'AdminLegalTech2024'
+                    })
+                });
+
+                log(`🔐 Auth Status: ${authResponse.status}`, authResponse.ok ? 'success' : 'error');
+
+                if (authResponse.ok) {
+                    const authData = await authResponse.json();
+                    log(`🔐 Auth Success! Token: ${authData.token?.substring(0, 50)}...`, 'success');
+                    log(`👤 User: ${authData.user?.firstName} ${authData.user?.lastName} (${authData.user?.role})`, 'success');
+                    
+                    // Test authenticated request
+                    const dashboardResponse = await fetch(`${apiUrl}/dashboard/overview`, {
+                        headers: {
+                            'Authorization': `Bearer ${authData.token}`
+                        }
+                    });
+                    
+                    log(`📊 Dashboard Status: ${dashboardResponse.status}`, dashboardResponse.ok ? 'success' : 'error');
+                    
+                    if (dashboardResponse.ok) {
+                        const dashboardData = await dashboardResponse.json();
+                        log(`📊 Dashboard Data: ${JSON.stringify(dashboardData)}`, 'success');
+                    }
+                } else {
+                    const errorData = await authResponse.text();
+                    log(`❌ Auth failed: ${errorData}`, 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Network Error: ${error.message}`, 'error');
+                log(`❌ Full Error: ${JSON.stringify(error)}`, 'error');
+            }
+
+            log(`--- End of ${label} test ---\n`, 'info');
+        }
+
+        function testLocal() {
+            testAuth('http://localhost:3000/api', 'Local Backend');
+        }
+
+        function testProduction() {
+            testAuth('https://legalestate.tech/api', 'Production Backend');
+        }
+
+        function testDirect() {
+            // Test the current domain
+            const currentOrigin = window.location.origin;
+            testAuth(`${currentOrigin}/api`, 'Current Domain');
+        }
+
+        // Auto-run a basic test
+        log('🚀 Simple Auth Test Ready', 'info');
+        log('Click buttons above to test different endpoints', 'info');
+    </script>
+</body>
+</html>

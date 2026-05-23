@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Environment — never commit secrets
+.env
+.env.*
+!.env.example
+
+# Sensitive docs
+*CREDENTIALS*.md
+PRODUCTION_CREDENTIALS.md
+
+# Build output
+frontend/build/
+backend/dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Runtime / OS
+.DS_Store
+Thumbs.db
+
+# Database backups
+database-backup/
+backups/
+*.sql.gz
+*.tar.gz
+
+# Keys and certs
+*.pem
+*.key
+*.crt
+
+# Nginx configs (server-specific)
+nginx/
+
+# PM2
+.pm2/
+
+# Prisma generated
+backend/node_modules/

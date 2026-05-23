@@ -1,0 +1,895 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client-professional"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  ATTORNEY
+  PARALEGAL
+  ASSISTANT
+  CLIENT
+}
+
+enum CaseStatus {
+  INTAKE
+  CONSULTATION_SCHEDULED
+  CONSULTATION_COMPLETED
+  RETAINER_SIGNED
+  INVESTIGATION
+  DISCOVERY
+  ACTIVE
+  SETTLEMENT_NEGOTIATION
+  MEDIATION
+  ARBITRATION
+  LITIGATION
+  TRIAL_PREPARATION
+  TRIAL
+  POST_TRIAL
+  SETTLED
+  DISMISSED
+  CLOSED
+  ARCHIVED
+  ON_HOLD
+  REFERRED_OUT
+}
+
+enum CasePriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum CaseStage {
+  PRE_LITIGATION
+  LITIGATION
+  SETTLEMENT
+  TRIAL
+  POST_JUDGMENT
+  APPEAL
+  CLOSED
+}
+
+enum CaseSource {
+  REFERRAL_ATTORNEY
+  REFERRAL_CLIENT
+  REFERRAL_FRIEND
+  ONLINE_SEARCH
+  ADVERTISEMENT
+  SOCIAL_MEDIA
+  YELLOW_PAGES
+  DIRECT_MAIL
+  WALK_IN
+  RETURN_CLIENT
+  OTHER
+}
+
+enum CaseType {
+  PERSONAL_INJURY
+  AUTO_ACCIDENT
+  MEDICAL_MALPRACTICE
+  WORKERS_COMP
+  PREMISES_LIABILITY
+  PRODUCT_LIABILITY
+  CONTRACT_DISPUTE
+  EMPLOYMENT_LAW
+  FAMILY_LAW
+  CRIMINAL_DEFENSE
+  ESTATE_PLANNING
+  REAL_ESTATE
+  BANKRUPTCY
+  BUSINESS_LAW
+  IMMIGRATION
+}
+
+enum DocumentType {
+  CONTRACT
+  MEDICAL_RECORD
+  POLICE_REPORT
+  INSURANCE_DOCUMENT
+  PHOTO_EVIDENCE
+  CORRESPONDENCE
+  LEGAL_BRIEF
+  DEMAND_LETTER
+  SETTLEMENT_AGREEMENT
+  DISCOVERY_REQUEST
+  RETAINER_AGREEMENT
+  INVOICE
+  RECEIPT
+  WITNESS_STATEMENT
+  EXPERT_REPORT
+  COURT_FILING
+  OTHER
+}
+
+enum EventType {
+  COURT_DATE
+  DEPOSITION
+  MEDIATION
+  ARBITRATION
+  SETTLEMENT_CONFERENCE
+  CLIENT_MEETING
+  DEADLINE
+  STATUTE_DEADLINE
+  DISCOVERY_DEADLINE
+  TRIAL_DATE
+  APPEAL_DEADLINE
+  CONSULTATION
+  FOLLOW_UP
+  TEAM_MEETING
+  CASE_REVIEW
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+  PARTIAL_PAYMENT
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+  DOMESTIC_PARTNER
+}
+
+enum ContactMethod {
+  EMAIL
+  PHONE
+  TEXT
+  MAIL
+  IN_PERSON
+}
+
+enum CommunicationType {
+  EMAIL
+  PHONE
+  TEXT
+  MEETING
+  LETTER
+  VIDEO_CALL
+  VOICEMAIL
+  FAX
+  DOCUMENT_DELIVERY
+  TEAM_MESSAGE
+  SLACK_MESSAGE
+  TEAMS_MESSAGE
+}
+
+enum CommunicationDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CommunicationStatus {
+  DRAFT
+  SENT
+  DELIVERED
+  READ
+  REPLIED
+  FAILED
+  SCHEDULED
+}
+
+enum PermissionType {
+  READ
+  WRITE
+  DELETE
+  ADMIN
+  ASSIGN
+  SHARE
+}
+
+// Enhanced User model with team features
+model User {
+  id               String         @id @default(cuid())
+  email            String         @unique @db.VarChar(255)
+  password         String?        @db.VarChar(255)
+  name             String         @db.VarChar(255)
+  firstName        String?        @db.VarChar(100)
+  lastName         String?        @db.VarChar(100)
+  role             UserRole       @default(PARALEGAL)
+  isActive         Boolean        @default(true)
+  phone            String?        @db.VarChar(20)
+  address          String?        @db.Text
+  barNumber        String?        @unique @db.VarChar(50)
+  signature        String?        @db.VarChar(500)
+  hourlyRate       Decimal?       @db.Decimal(8,2)
+
+  // Professional package features
+  department       String?        @db.VarChar(100) // Legal, Paralegal, Administrative
+  title            String?        @db.VarChar(100) // Senior Attorney, Junior Paralegal, etc.
+  hireDate         DateTime?      @db.Date
+  supervisor       String?        // User ID of supervisor
+  canAssignTasks   Boolean        @default(false)
+  canManageClients Boolean        @default(false)
+  canViewBilling   Boolean        @default(false)
+  canManageUsers   Boolean        @default(false)
+
+  // Account security
+  emailVerified    Boolean        @default(false)
+  emailVerificationToken String?  @unique @db.VarChar(255)
+  passwordResetToken String?      @unique @db.VarChar(255)
+  passwordResetExpires DateTime?  @db.Timestamptz(6)
+  loginAttempts    Int            @default(0)
+  lockedUntil      DateTime?      @db.Timestamptz(6)
+  twoFactorSecret  String?        @db.VarChar(255)
+  twoFactorEnabled Boolean        @default(false)
+
+  // Team collaboration
+  avatarUrl        String?        @db.VarChar(500)
+  bio              String?        @db.Text
+  workingHours     Json?          @db.JsonB // Work schedule
+  timezone         String?        @db.VarChar(50)
+  slackUserId      String?        @db.VarChar(50)
+  teamsUserId      String?        @db.VarChar(50)
+
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  lastLogin        DateTime?      @db.Timestamptz(6)
+
+  // Relations
+  assignedCases    Case[]         @relation("CaseAttorney")
+  paralegalCases   Case[]         @relation("CaseParalegal")
+  secondAttorneyCases Case[]      @relation("CaseSecondAttorney")
+  referredCases    Case[]         @relation("CaseReferringAttorney")
+  createdClients   Client[]       @relation("ClientCreator")
+  assignedTasks    Task[]         @relation("TaskAssignedTo")
+  createdTasks     Task[]         @relation("TaskCreator")
+  timeEntries      TimeEntry[]
+  documents        Document[]
+  activities       Activity[]
+  notes            Note[]
+  settlements      Settlement[]
+  invoices         Invoice[]
+  calendarEvents   CalendarEvent[]
+  communications   Communication[]
+
+  // Team features
+  supervisorUser   User?          @relation("UserSupervisor", fields: [supervisor], references: [id])
+  subordinates     User[]         @relation("UserSupervisor")
+  caseTeamMembers  CaseTeamMember[]
+  teamMessages     TeamMessage[]  @relation("TeamMessageSender")
+  receivedMessages TeamMessage[]  @relation("TeamMessageRecipient")
+  casePermissions  CasePermission[]
+  userPermissions  UserPermission[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([department])
+  @@map("users")
+}
+
+// Team collaboration models
+model Team {
+  id               String         @id @default(cuid())
+  name             String         @db.VarChar(200)
+  description      String?        @db.Text
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+
+  members          TeamMember[]
+  cases            CaseTeam[]
+  messages         TeamMessage[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id               String         @id @default(cuid())
+  teamId           String
+  userId           String
+  role             String         @default("member") // leader, member
+  joinedAt         DateTime       @default(now()) @db.Timestamptz(6)
+
+  team             Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model TeamMessage {
+  id               String         @id @default(cuid())
+  teamId           String?
+  senderId         String
+  recipientId      String?        // For direct messages
+  message          String         @db.Text
+  isRead           Boolean        @default(false)
+  readAt           DateTime?      @db.Timestamptz(6)
+  threadId         String?        // For threaded conversations
+  attachmentUrl    String?        @db.VarChar(500)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+
+  team             Team?          @relation(fields: [teamId], references: [id])
+  sender           User           @relation("TeamMessageSender", fields: [senderId], references: [id])
+  recipient        User?          @relation("TeamMessageRecipient", fields: [recipientId], references: [id])
+
+  @@index([teamId])
+  @@index([senderId])
+  @@index([recipientId])
+  @@map("team_messages")
+}
+
+model CaseTeam {
+  id               String         @id @default(cuid())
+  caseId           String
+  teamId           String
+  assignedAt       DateTime       @default(now()) @db.Timestamptz(6)
+
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  team             Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, teamId])
+  @@map("case_teams")
+}
+
+model CaseTeamMember {
+  id               String         @id @default(cuid())
+  caseId           String
+  userId           String
+  role             String         @default("member") // lead, member, observer
+  permissions      PermissionType[]
+  assignedAt       DateTime       @default(now()) @db.Timestamptz(6)
+  assignedById     String?
+
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy       User?          @relation("CaseTeamMemberAssigner", fields: [assignedById], references: [id])
+
+  @@unique([caseId, userId])
+  @@map("case_team_members")
+}
+
+model CasePermission {
+  id               String         @id @default(cuid())
+  caseId           String
+  userId           String
+  permissions      PermissionType[]
+  grantedAt        DateTime       @default(now()) @db.Timestamptz(6)
+  grantedById      String
+
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy        User           @relation("CasePermissionGranter", fields: [grantedById], references: [id])
+
+  @@unique([caseId, userId])
+  @@map("case_permissions")
+}
+
+model UserPermission {
+  id               String         @id @default(cuid())
+  userId           String
+  permission       String         @db.VarChar(100) // manage_users, manage_billing, etc.
+  grantedAt        DateTime       @default(now()) @db.Timestamptz(6)
+  grantedById      String
+
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy        User           @relation("UserPermissionGranter", fields: [grantedById], references: [id])
+
+  @@unique([userId, permission])
+  @@map("user_permissions")
+}
+
+// Enhanced models with team features
+model Client {
+  id               String         @id @default(cuid())
+  firstName        String         @db.VarChar(100)
+  lastName         String         @db.VarChar(100)
+  email            String?        @db.VarChar(255)
+  phone            String?        @db.VarChar(20)
+  address          String?        @db.VarChar(500)
+  city             String?        @db.VarChar(100)
+  state            String?        @db.VarChar(2)
+  zipCode          String?        @db.VarChar(10)
+  dateOfBirth      DateTime?      @db.Date
+  ssn              String?        @db.VarChar(11)
+  emergencyContact String?        @db.VarChar(255)
+  emergencyPhone   String?        @db.VarChar(20)
+  notes            String?        @db.Text
+  source           String?        @db.VarChar(100)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  createdById      String
+
+  // Professional package features
+  mobile           String?        @db.VarChar(20)
+  workPhone        String?        @db.VarChar(20)
+  employer         String?        @db.VarChar(200)
+  occupation       String?        @db.VarChar(100)
+  maritalStatus    MaritalStatus  @default(SINGLE)
+  spouseName       String?        @db.VarChar(200)
+  preferredContact ContactMethod  @default(EMAIL)
+  isActive         Boolean        @default(true)
+  clientNumber     String?        @unique @db.VarChar(20)
+
+  // Team features
+  assignedTeam     String?        // Team responsible for this client
+  primaryContact   String?        // Primary team member for this client
+
+  // Relations
+  createdBy        User           @relation("ClientCreator", fields: [createdById], references: [id])
+  cases            Case[]
+  communications   Communication[]
+  documents        Document[]
+  emergencyContacts EmergencyContact[]
+  tasks            Task[]
+  calendarEvents   CalendarEvent[]
+  invoices         Invoice[]
+
+  @@index([email])
+  @@index([lastName, firstName])
+  @@index([assignedTeam])
+  @@map("clients")
+}
+
+model EmergencyContact {
+  id           String         @id @default(cuid())
+  firstName    String         @db.VarChar(100)
+  lastName     String         @db.VarChar(100)
+  relationship String         @db.VarChar(100)
+  phone        String?        @db.VarChar(20)
+  email        String?        @db.VarChar(255)
+  address      String?        @db.VarChar(500)
+  isPrimary    Boolean        @default(false)
+  clientId     String
+  createdAt    DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime       @updatedAt @db.Timestamptz(6)
+
+  client       Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@map("emergency_contacts")
+}
+
+// Enhanced Case model with team features
+model Case {
+  id               String         @id @default(cuid())
+  caseNumber       String         @unique @db.VarChar(50)
+  title            String         @db.VarChar(500)
+  description      String?        @db.Text
+  type             CaseType
+  status           CaseStatus     @default(INTAKE)
+  priority         CasePriority   @default(MEDIUM)
+  stage            CaseStage      @default(PRE_LITIGATION)
+  source           CaseSource?
+
+  // Key Dates
+  dateOpened       DateTime       @default(now()) @db.Date
+  consultationDate DateTime?      @db.Date
+  retainerSignedDate DateTime?    @db.Date
+  discoveryStartDate DateTime?    @db.Date
+  discoveryEndDate DateTime?      @db.Date
+  mediationDate    DateTime?      @db.Date
+  trialDate        DateTime?      @db.Date
+  settlementDate   DateTime?      @db.Date
+  dateClosed       DateTime?      @db.Date
+
+  // Deadlines
+  statute          DateTime?      @db.Date
+  nextDeadline     DateTime?      @db.Date
+  deadlineDescription String?     @db.VarChar(500)
+
+  // Team Assignment
+  clientId         String
+  attorneyId       String?        // Primary attorney
+  paralegalId      String?        // Primary paralegal
+  secondAttorneyId String?        // Co-counsel
+  referringAttorneyId String?
+
+  // Professional package features
+  caseManagerId    String?        // Case manager
+  intakeById       String?        // Who did the intake
+  assignedTeamId   String?        // Assigned team
+  collaborationLevel String       @default("standard") // standard, restricted, open
+
+  // Case Value and Settlement
+  estimatedValue   Decimal?       @db.Decimal(12,2)
+  demandAmount     Decimal?       @db.Decimal(12,2)
+  settlementAmount Decimal?       @db.Decimal(12,2)
+  attorneyFees     Decimal?       @db.Decimal(12,2)
+  costs            Decimal?       @db.Decimal(12,2)
+  netToClient      Decimal?       @db.Decimal(12,2)
+  contingencyRate  Decimal?       @db.Decimal(5,2)
+
+  // Progress Metrics
+  hoursWorked      Decimal?       @default(0) @db.Decimal(8,2)
+  totalBilled      Decimal?       @default(0) @db.Decimal(12,2)
+  costsIncurred    Decimal?       @default(0) @db.Decimal(12,2)
+
+  // Administrative
+  isActive         Boolean        @default(true)
+  isArchived       Boolean        @default(false)
+  internalNotes    String?        @db.Text
+  clientInstructions String?      @db.Text
+  customFields     Json?          @db.JsonB
+
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  client           Client         @relation(fields: [clientId], references: [id])
+  attorney         User?          @relation("CaseAttorney", fields: [attorneyId], references: [id])
+  paralegal        User?          @relation("CaseParalegal", fields: [paralegalId], references: [id])
+  secondAttorney   User?          @relation("CaseSecondAttorney", fields: [secondAttorneyId], references: [id])
+  referringAttorney User?         @relation("CaseReferringAttorney", fields: [referringAttorneyId], references: [id])
+
+  // Team relations
+  teamMembers      CaseTeamMember[]
+  teams            CaseTeam[]
+  permissions      CasePermission[]
+
+  // Standard relations
+  documents        Document[]
+  tasks            Task[]
+  timeEntries      TimeEntry[]
+  notes            Note[]
+  communications   Communication[]
+  expenses         Expense[]
+  settlements      Settlement[]
+  calendarEvents   CalendarEvent[]
+  invoices         Invoice[]
+  activities       Activity[]
+
+  @@index([caseNumber])
+  @@index([status])
+  @@index([assignedTeamId])
+  @@index([attorneyId])
+  @@map("cases")
+}
+
+// Enhanced Task model with assignment features
+model Task {
+  id               String         @id @default(cuid())
+  title            String         @db.VarChar(200)
+  description      String?        @db.Text
+  dueDate          DateTime?      @db.Date
+  priority         CasePriority   @default(MEDIUM)
+  status           String         @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  estimatedHours   Decimal?       @db.Decimal(5,2)
+  actualHours      Decimal?       @db.Decimal(5,2)
+
+  // Assignment and delegation
+  caseId           String?
+  clientId         String?
+  assignedToId     String
+  createdById      String
+  delegatedById    String?        // Who delegated this task
+
+  // Professional features
+  taskType         String?        @db.VarChar(100) // RESEARCH, DRAFTING, FILING, etc.
+  billable         Boolean        @default(true)
+  dependencies     String[]       @db.VarChar(50) // Task IDs this task depends on
+  subtasks         Json?          @db.JsonB       // Checklist items
+
+  completedAt      DateTime?      @db.Timestamptz(6)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+
+  case             Case?          @relation(fields: [caseId], references: [id])
+  client           Client?        @relation(fields: [clientId], references: [id])
+  assignedTo       User           @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+  createdBy        User           @relation("TaskCreator", fields: [createdById], references: [id])
+  delegatedBy      User?          @relation("TaskDelegator", fields: [delegatedById], references: [id])
+
+  @@index([assignedToId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+// Enhanced Communication model
+model Communication {
+  id               String                @id @default(cuid())
+  type             CommunicationType
+  direction        CommunicationDirection
+  status           CommunicationStatus   @default(SENT)
+  subject          String?               @db.VarChar(500)
+  content          String?               @db.Text
+  summary          String?               @db.VarChar(1000)
+  dateTime         DateTime              @db.Timestamptz(6)
+  duration         Int?
+  followUpRequired Boolean               @default(false)
+  followUpDate     DateTime?             @db.Date
+  priority         CasePriority?         @default(MEDIUM)
+
+  // Contact information
+  fromEmail        String?               @db.VarChar(255)
+  toEmails         String[]
+  fromPhone        String?               @db.VarChar(20)
+  toPhone          String?               @db.VarChar(20)
+
+  // Professional features
+  isInternal       Boolean               @default(false) // Internal team communication
+  isConfidential   Boolean               @default(false)
+  billable         Boolean               @default(true)
+  billingNotes     String?               @db.VarChar(500)
+  attachmentCount  Int                   @default(0)
+
+  // Relationships
+  caseId           String?
+  clientId         String?
+  userId           String
+  createdAt        DateTime              @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime              @updatedAt @db.Timestamptz(6)
+
+  case             Case?                 @relation(fields: [caseId], references: [id])
+  client           Client?               @relation(fields: [clientId], references: [id])
+  user             User                  @relation(fields: [userId], references: [id])
+
+  @@index([type])
+  @@index([isInternal])
+  @@map("communications")
+}
+
+// Standard models (simplified for brevity - same as original schema)
+model Document {
+  id               String         @id @default(cuid())
+  title            String         @db.VarChar(300)
+  filename         String?        @db.VarChar(255)
+  originalName     String?        @db.VarChar(255)
+  fileType         String?        @db.VarChar(50)
+  fileSize         Int?
+  filePath         String?        @db.VarChar(500)
+  type             DocumentType   @default(OTHER)
+  content          String?        @db.Text
+  description      String?        @db.Text
+
+  // Professional features
+  isTemplate       Boolean        @default(false)
+  templateCategory String?        @db.VarChar(100)
+  sharedWith       String[]       // User IDs who have access
+
+  // Activity tracking
+  viewCount        Int            @default(0)
+  lastViewed       DateTime?      @db.Timestamptz(6)
+  downloadCount    Int            @default(0)
+  lastDownload     DateTime?      @db.Timestamptz(6)
+
+  caseId           String?
+  clientId         String?
+  uploadedBy       String
+  generatedBy      String?
+  aiProvider       String?
+  metadata         Json?          @db.JsonB
+  version          Int            @default(1)
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+
+  case             Case?          @relation(fields: [caseId], references: [id])
+  client           Client?        @relation(fields: [clientId], references: [id])
+  user             User           @relation(fields: [uploadedBy], references: [id])
+
+  @@index([type])
+  @@index([isTemplate])
+  @@map("documents")
+}
+
+model TimeEntry {
+  id               String         @id @default(cuid())
+  description      String         @db.VarChar(500)
+  hours            Decimal        @db.Decimal(5,2)
+  rate             Decimal        @db.Decimal(8,2)
+  amount           Decimal        @db.Decimal(12,2)
+  date             DateTime       @db.Date
+  billable         Boolean        @default(true)
+  billed           Boolean        @default(false)
+
+  // Professional features
+  taskId           String?        // Link to specific task
+  isAutoTracked    Boolean        @default(false)
+  activityType     String?        @db.VarChar(100)
+  metadata         Json?          @db.JsonB
+  approvedBy       String?        // For time approval workflow
+  approvedAt       DateTime?      @db.Timestamptz(6)
+
+  caseId           String?
+  userId           String
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+
+  case             Case?          @relation(fields: [caseId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
+  task             Task?          @relation(fields: [taskId], references: [id])
+  approver         User?          @relation("TimeEntryApprover", fields: [approvedBy], references: [id])
+
+  @@index([userId])
+  @@index([billable])
+  @@map("time_entries")
+}
+
+model Note {
+  id               String         @id @default(cuid())
+  content          String         @db.Text
+  isPrivate        Boolean        @default(false)
+  isPinned         Boolean        @default(false)
+  tags             String[]
+  caseId           String?
+  createdById      String
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+
+  case             Case?          @relation(fields: [caseId], references: [id])
+  createdBy        User           @relation(fields: [createdById], references: [id])
+
+  @@index([isPinned])
+  @@map("notes")
+}
+
+model Expense {
+  id               String         @id @default(cuid())
+  description      String         @db.VarChar(300)
+  amount           Decimal        @db.Decimal(12,2)
+  category         String         @db.VarChar(100)
+  date             DateTime       @db.Date
+  receipt          String?        @db.VarChar(500)
+  reimbursable     Boolean        @default(true)
+  reimbursed       Boolean        @default(false)
+  approvedBy       String?
+  approvedAt       DateTime?      @db.Timestamptz(6)
+  caseId           String?
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+
+  case             Case?          @relation(fields: [caseId], references: [id])
+  approver         User?          @relation("ExpenseApprover", fields: [approvedBy], references: [id])
+
+  @@map("expenses")
+}
+
+model Activity {
+  id               String         @id @default(cuid())
+  action           String         @db.VarChar(100)
+  description      String         @db.VarChar(500)
+  entityType       String         @db.VarChar(50)
+  entityId         String         @db.VarChar(50)
+  userId           String
+  ipAddress        String?        @db.VarChar(45)
+  userAgent        String?        @db.Text
+  metadata         Json?          @db.JsonB
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+
+  user             User           @relation(fields: [userId], references: [id])
+  case             Case?          @relation(fields: [entityId], references: [id])
+
+  @@index([entityType, entityId])
+  @@map("activities")
+}
+
+model Settlement {
+  id               String         @id @default(cuid())
+  caseId           String
+  amount           Decimal        @db.Decimal(12,2)
+  status           String         @default("DRAFT")
+  proposedDate     DateTime?      @db.Date
+  acceptedDate     DateTime?      @db.Date
+  executedDate     DateTime?      @db.Date
+  paidDate         DateTime?      @db.Date
+
+  attorneyFees     Decimal?       @db.Decimal(12,2)
+  costs            Decimal?       @db.Decimal(12,2)
+  netToClient      Decimal?       @db.Decimal(12,2)
+  attorneyPercent  Decimal?       @db.Decimal(5,2)
+
+  description      String?        @db.Text
+  negotiatedById   String
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+
+  case             Case           @relation(fields: [caseId], references: [id])
+  negotiatedBy     User           @relation(fields: [negotiatedById], references: [id])
+
+  @@map("settlements")
+}
+
+model CalendarEvent {
+  id               String         @id @default(cuid())
+  title            String         @db.VarChar(300)
+  description      String?        @db.Text
+  type             EventType
+  startDate        DateTime       @db.Date
+  endDate          DateTime?      @db.Date
+  startTime        String?        @db.VarChar(10)
+  endTime          String?        @db.VarChar(10)
+  allDay           Boolean        @default(false)
+  location         String?        @db.VarChar(300)
+
+  // Professional features
+  isRecurring      Boolean        @default(false)
+  recurringRule    Json?          @db.JsonB
+  attendees        String[]       // User IDs
+  isTeamEvent      Boolean        @default(false)
+
+  caseId           String?
+  clientId         String?
+  createdById      String
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+
+  case             Case?          @relation(fields: [caseId], references: [id])
+  client           Client?        @relation(fields: [clientId], references: [id])
+  createdBy        User           @relation(fields: [createdById], references: [id])
+
+  @@index([startDate])
+  @@index([isTeamEvent])
+  @@map("calendar_events")
+}
+
+model Invoice {
+  id               String         @id @default(cuid())
+  invoiceNumber    String         @unique @db.VarChar(50)
+  clientId         String?
+  caseId           String?
+
+  issueDate        DateTime       @default(now()) @db.Date
+  dueDate          DateTime       @db.Date
+  paidDate         DateTime?      @db.Date
+  status           InvoiceStatus  @default(DRAFT)
+
+  subtotal         Decimal        @db.Decimal(12,2)
+  taxRate          Decimal?       @default(0) @db.Decimal(5,4)
+  taxAmount        Decimal?       @default(0) @db.Decimal(12,2)
+  totalAmount      Decimal        @db.Decimal(12,2)
+  paidAmount       Decimal?       @default(0) @db.Decimal(12,2)
+  balanceDue       Decimal?       @db.Decimal(12,2)
+
+  description      String?        @db.Text
+  notes            String?        @db.Text
+  terms            String?        @db.Text
+
+  createdById      String
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+
+  case             Case?          @relation(fields: [caseId], references: [id])
+  client           Client?        @relation(fields: [clientId], references: [id])
+  createdBy        User           @relation(fields: [createdById], references: [id])
+
+  @@map("invoices")
+}
+
+// Professional Package Configuration
+model ProfessionalConfig {
+  id               String         @id @default(cuid())
+  maxUsers         Int            @default(25)
+  currentUserCount Int            @default(0)
+
+  // Feature flags
+  teamFeaturesEnabled Boolean     @default(true)
+  taskDelegationEnabled Boolean   @default(true)
+  documentSharingEnabled Boolean  @default(true)
+  timeTrackingEnabled Boolean     @default(true)
+  billingEnabled   Boolean        @default(true)
+  clientPortalEnabled Boolean     @default(true)
+
+  // AI Configuration
+  aiProvidersEnabled String[]     @default(["openai", "ollama"])
+  primaryAiProvider String        @default("openai")
+  aiFeatures       Json?          @db.JsonB
+
+  // Integration settings
+  slackIntegration Boolean        @default(false)
+  slackWebhookUrl  String?        @db.VarChar(500)
+  teamsIntegration Boolean        @default(false)
+  teamsWebhookUrl  String?        @db.VarChar(500)
+
+  // System settings
+  autoBackup       Boolean        @default(true)
+  backupSchedule   String         @default("daily")
+  dataRetention    Int            @default(7) // years
+
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+
+  @@map("professional_config")
+}
