@@ -264,7 +264,7 @@ const Dashboard = () => {
                     <p className="text-xs font-medium truncate" style={{ color: 'oklch(0.55 0.006 60)' }}>
                       {stat.title}
                     </p>
-                    <p className="text-lg font-semibold" style={{ color: 'oklch(0.18 0.008 60)' }}>
+                    <p className="text-lg font-semibold" style={{ color: 'oklch(0.18 0.008 60)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>
                       {stat.value}
                     </p>
                     <p className="text-xs flex items-center gap-0.5" style={{ color: stat.change >= 0 ? 'oklch(0.48 0.12 145)' : 'oklch(0.50 0.15 25)' }}>
