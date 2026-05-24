@@ -22,9 +22,11 @@ import { useToast } from '../Common/Toast';
 const STATUS_STYLES = {
   ACTIVE:                { bg: 'oklch(0.95 0.025 145)', text: 'oklch(0.35 0.10 145)' },
   INTAKE:                { bg: 'oklch(0.95 0.015 240)', text: 'oklch(0.30 0.018 240)' },
+  INVESTIGATION:         { bg: 'oklch(0.94 0.020 200)', text: 'oklch(0.32 0.09 200)'  },
   DISCOVERY:             { bg: 'oklch(0.94 0.025 220)', text: 'oklch(0.35 0.08 220)'  },
   SETTLEMENT_NEGOTIATION:{ bg: 'oklch(0.94 0.025 290)', text: 'oklch(0.38 0.10 290)'  },
   SETTLEMENT:            { bg: 'oklch(0.94 0.025 290)', text: 'oklch(0.38 0.10 290)'  },
+  SETTLED:               { bg: 'oklch(0.94 0.025 145)', text: 'oklch(0.35 0.10 145)'  },
   PENDING:               { bg: 'oklch(0.96 0.04 75)',   text: 'oklch(0.40 0.10 75)'   },
   CLOSED:                { bg: 'oklch(0.93 0.005 60)',  text: 'oklch(0.50 0.006 60)'  },
   ARCHIVED:              { bg: 'oklch(0.93 0.005 60)',  text: 'oklch(0.60 0.005 60)'  },
@@ -155,7 +157,7 @@ const Dashboard = () => {
             <Link
               key={s.label}
               to={s.link}
-              className="block px-6 py-5 group"
+              className="block px-6 py-5 group transition-colors hover:bg-[oklch(0.96_0.004_60)]"
               style={{ textDecoration: 'none' }}
             >
               <p className="text-xs font-semibold uppercase tracking-widest mb-2"
@@ -191,7 +193,7 @@ const Dashboard = () => {
           <Link
             key={to}
             to={to}
-            className="px-3 py-1 rounded text-xs font-medium transition-colors"
+            className="px-3 py-1 rounded text-xs font-medium transition-colors hover:bg-[oklch(0.94_0.006_60)]"
             style={{
               border: '1px solid oklch(0.85 0.006 60)',
               color: 'oklch(0.30 0.008 60)',
@@ -234,11 +236,16 @@ const Dashboard = () => {
             <div>
               <div className="px-5 py-2 grid grid-cols-12 gap-3 border-b"
                 style={{ ...divider, backgroundColor: 'oklch(0.97 0.005 60)' }}>
-                {['Case', 'Type', 'Value', 'Status', 'Updated'].map(h => (
-                  <p key={h} className={`text-xs font-semibold uppercase tracking-widest
-                    ${h === 'Case' ? 'col-span-4' : h === 'Type' ? 'col-span-3' : h === 'Value' ? 'col-span-2' : 'col-span-2'}`}
+                {[
+                  { label: 'Case',    span: 'col-span-4' },
+                  { label: 'Type',    span: 'col-span-3' },
+                  { label: 'Value',   span: 'col-span-2' },
+                  { label: 'Status',  span: 'col-span-2' },
+                  { label: 'Updated', span: 'col-span-1 text-right' },
+                ].map(({ label, span }) => (
+                  <p key={label} className={`text-xs font-semibold uppercase ${span}`}
                     style={{ color: 'oklch(0.62 0.005 60)', letterSpacing: '0.06em' }}>
-                    {h}
+                    {label}
                   </p>
                 ))}
               </div>
@@ -248,7 +255,7 @@ const Dashboard = () => {
                   <Link
                     key={c?.id || i}
                     to={`/app/cases/${c?.id || ''}`}
-                    className="grid grid-cols-12 gap-3 px-5 py-3 items-center border-b last:border-0 transition-colors"
+                    className="grid grid-cols-12 gap-3 px-5 py-3 items-center border-b last:border-0 transition-colors hover:bg-[oklch(0.97_0.004_60)]"
                     style={{
                       borderColor: 'oklch(0.93 0.004 60)',
                       textDecoration: 'none',

@@ -14,14 +14,16 @@ import {
 import { Menu } from '@headlessui/react';
 
 // Status badge styles using OKLCH tokens (style objects, not Tailwind classes)
+// Shared across Dashboard — keep in sync
 const STATUS_STYLES = {
   INTAKE:                { bg: 'oklch(0.95 0.015 240)', text: 'oklch(0.30 0.018 240)' },
-  INVESTIGATION:         { bg: 'oklch(0.96 0.04 75)',   text: 'oklch(0.40 0.10 75)'  },
-  ACTIVE:                { bg: 'oklch(0.95 0.025 145)', text: 'oklch(0.35 0.10 145)' },
-  SETTLEMENT_NEGOTIATION:{ bg: 'oklch(0.94 0.025 290)', text: 'oklch(0.38 0.10 290)' },
-  SETTLED:               { bg: 'oklch(0.94 0.025 220)', text: 'oklch(0.35 0.08 220)' },
-  CLOSED:                { bg: 'oklch(0.93 0.005 60)',  text: 'oklch(0.50 0.006 60)' },
-  ARCHIVED:              { bg: 'oklch(0.93 0.005 60)',  text: 'oklch(0.60 0.005 60)' },
+  INVESTIGATION:         { bg: 'oklch(0.94 0.020 200)', text: 'oklch(0.32 0.09 200)'  },
+  ACTIVE:                { bg: 'oklch(0.95 0.025 145)', text: 'oklch(0.35 0.10 145)'  },
+  SETTLEMENT_NEGOTIATION:{ bg: 'oklch(0.94 0.025 290)', text: 'oklch(0.38 0.10 290)'  },
+  SETTLED:               { bg: 'oklch(0.94 0.025 145)', text: 'oklch(0.35 0.10 145)'  },
+  PENDING:               { bg: 'oklch(0.96 0.04 75)',   text: 'oklch(0.40 0.10 75)'   },
+  CLOSED:                { bg: 'oklch(0.93 0.005 60)',  text: 'oklch(0.50 0.006 60)'  },
+  ARCHIVED:              { bg: 'oklch(0.93 0.005 60)',  text: 'oklch(0.60 0.005 60)'  },
 };
 
 const getStatusStyle = (status) => STATUS_STYLES[status] || STATUS_STYLES.CLOSED;
@@ -69,7 +71,7 @@ const CaseList = () => {
       setCases(response.cases || []);
       setPagination(prev => ({ ...prev, ...(response.pagination || {}) }));
     } catch (error) {
-      console.error('Error fetching cases:', error);
+      if (process.env.NODE_ENV !== 'production') console.warn('Failed to fetch cases:', error);
       setCases([]);
     } finally {
       setLoading(false);
@@ -200,11 +202,12 @@ const CaseList = () => {
                 </tr>
               </thead>
               <tbody>
-                {cases.map((c, i) => {
+                {cases.map((c) => {
                   const ss = getStatusStyle(c.status);
                   return (
                     <tr
                       key={c.id}
+                      className="transition-colors hover:bg-[oklch(0.97_0.004_60)]"
                       style={{ borderBottom: '1px solid oklch(0.93 0.004 60)' }}
                     >
                       <td className="px-5 py-4">

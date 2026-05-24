@@ -69,7 +69,7 @@ const Login = () => {
               required
               value={formData.email}
               onChange={handleChange}
-              className="block w-full px-3 py-2 rounded text-sm focus:outline-none"
+              className="block w-full px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[oklch(0.42_0.022_240)] focus:ring-offset-0"
               style={{
                 border: '1px solid oklch(0.85 0.006 60)',
                 backgroundColor: 'oklch(0.99 0.003 60)',

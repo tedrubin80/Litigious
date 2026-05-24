@@ -64,7 +64,7 @@ const Header = ({ setSidebarOpen, pageTitle }) => {
           <button
             type="button"
             onClick={() => setShowVideoModal(true)}
-            className="p-1.5 rounded flex items-center justify-center transition-colors"
+            className="p-1.5 rounded flex items-center justify-center transition-colors hover:bg-[oklch(0.93_0.010_240)]"
             style={{ color: 'oklch(0.42 0.022 240)' }}
             title="Start Video Conference"
           >
@@ -77,7 +77,7 @@ const Header = ({ setSidebarOpen, pageTitle }) => {
           {/* Notifications */}
           <button
             type="button"
-            className="p-1.5 rounded"
+            className="p-1.5 rounded transition-colors hover:bg-[oklch(0.93_0.004_60)]"
             style={{ color: 'oklch(0.55 0.006 60)' }}
           >
             <span className="sr-only">View notifications</span>

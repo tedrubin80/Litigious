@@ -10,7 +10,8 @@ require('dotenv').config();
 const app = express();
 
 // Trust proxy for Nginx reverse proxy - handles both HTTP and HTTPS
-app.set('trust proxy', true);
+// Use 1 (not true) to trust exactly one proxy (nginx) — satisfies express-rate-limit's ERR_ERL_PERMISSIVE_TRUST_PROXY
+app.set('trust proxy', 1);
 
 // Protocol detection middleware for HTTP/HTTPS fallback
 app.use((req, res, next) => {
