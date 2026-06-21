@@ -217,11 +217,12 @@ export const apiMethods = {
 export const endpoints = {
   // Authentication
   auth: {
-    login: (credentials) => apiMethods.post('/auth/roles/admin/login', credentials),
-    logout: () => apiMethods.post('/auth/roles/logout'),
-    refresh: (token) => apiMethods.post('/auth-v2/refresh', { token }),
+    login: (credentials) => apiMethods.post('/auth/login', credentials),
+    clientLogin: (credentials) => apiMethods.post('/auth/client/login', credentials),
+    logout: () => apiMethods.post('/auth/logout'),
+    refresh: (token) => apiMethods.post('/auth/v2/refresh', { token }),
     me: () => apiMethods.get('/auth/me'),
-    changePassword: (data) => apiMethods.put('/auth-v2/change-password', data),
+    changePassword: (data) => apiMethods.post('/auth/account/change-password', data),
   },
 
   // Users

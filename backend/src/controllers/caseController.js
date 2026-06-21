@@ -1,6 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const prisma = require('../lib/prisma');
 
 // Generate case number
 const generateCaseNumber = () => {
@@ -29,6 +27,26 @@ exports.getCases = async (req, res) => {
     if (type) where.type = type;
     if (attorneyId) where.attorneyId = attorneyId;
     if (paralegalId) where.paralegalId = paralegalId;
+
+    const userId = req.user?.userId || req.user?.id;
+    const role = req.user?.role;
+
+    if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
+      // Full access
+    } else if (role === 'ATTORNEY') {
+      where.OR = [
+        { attorneyId: userId },
+        { secondAttorneyId: userId },
+        { referringAttorneyId: userId }
+      ];
+    } else if (role === 'PARALEGAL') {
+      where.paralegalId = userId;
+    } else {
+      return res.status(403).json({
+        success: false,
+        message: 'Insufficient permissions to list cases'
+      });
+    }
     
     if (search) {
       where.OR = [

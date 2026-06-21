@@ -1,12 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../lib/prisma');
 const AuthUtils = require('../lib/authUtils');
-const { sendAuthResponse, clearAuthCookie } = require('../lib/authCookies');
+const { sendAuthResponse, clearAuthCookie, getTokenFromRequest } = require('../lib/authCookies');
 const router = express.Router();
-
-const prisma = new PrismaClient();
 
 // JWT Secret — crash at startup if not configured
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -16,7 +14,7 @@ if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
  * Admin Login Endpoint
  * For system administrators and staff
  */
-router.post('/admin/login', async (req, res) => {
+const handleAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -31,7 +29,6 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Find user with admin or staff roles only
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
@@ -47,7 +44,6 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Check if user has admin privileges
     const adminRoles = ['SUPER_ADMIN', 'ADMIN', 'ATTORNEY', 'PARALEGAL', 'STAFF'];
     if (!adminRoles.includes(user.role)) {
       return res.status(403).json({
@@ -60,7 +56,6 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({
@@ -73,7 +68,6 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Check if account is active
     if (!user.isActive) {
       return res.status(401).json({
         success: false,
@@ -85,7 +79,6 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Check account lockout
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       return res.status(423).json({
         success: false,
@@ -98,7 +91,6 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Reset login attempts on successful login
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -108,7 +100,6 @@ router.post('/admin/login', async (req, res) => {
       }
     });
 
-    // Generate JWT token
     const token = jwt.sign(
       {
         userId: user.id,
@@ -120,7 +111,6 @@ router.post('/admin/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    // Return success response
     return sendAuthResponse(res, {
       token,
       user: {
@@ -156,7 +146,10 @@ router.post('/admin/login', async (req, res) => {
       }
     });
   }
-});
+};
+
+router.post('/admin/login', handleAdminLogin);
+router.post('/login', handleAdminLogin);
 
 /**
  * Client/Tenant Login Endpoint
@@ -402,11 +395,50 @@ router.post('/logout', async (req, res) => {
 });
 
 /**
+ * Current user profile
+ */
+router.get('/me', async (req, res) => {
+  try {
+    const token = getTokenFromRequest(req);
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'No token provided'
+      });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    });
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+      });
+    }
+
+    const { password: _, ...userWithoutPassword } = user;
+    res.json({
+      success: true,
+      user: userWithoutPassword
+    });
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: 'Invalid token'
+    });
+  }
+});
+
+/**
  * Token verification endpoint
  */
 router.get('/verify', async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const token = getTokenFromRequest(req);
 
     if (!token) {
       return res.status(401).json({

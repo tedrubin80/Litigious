@@ -723,6 +723,8 @@ router.post('/logout', async (req, res) => {
       });
     }
 
+    clearAuthCookie(res);
+
     res.json({
       success: true,
       message: 'Logged out successfully'

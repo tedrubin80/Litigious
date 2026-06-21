@@ -35,9 +35,7 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3001;
 
 // Import routes
-const authRoutes = require('./src/routes/auth');
-const authEnhancedRoutes = require('./src/routes/auth-enhanced');
-const authRolesRoutes = require('./src/routes/auth-roles');
+const authUnifiedRoutes = require('./src/routes/auth-unified');
 const settlementRoutes = require('./src/routes/settlements');
 const aiDocumentRoutes = require('./src/routes/ai-documents');
 const userRoutes = require('./src/routes/users');
@@ -147,10 +145,13 @@ const endpointLimiters = SecurityMiddleware.createEndpointRateLimiters();
 // API v1 - Comprehensive RESTful API with error handling
 app.use('/api/v1', endpointLimiters.api, apiV1Routes);
 
-// Authentication routes
-app.use('/api/auth', endpointLimiters.auth, authRoutes); // Legacy auth routes
-app.use('/api/auth-v2', endpointLimiters.auth, authEnhancedRoutes); // Enhanced auth routes
-app.use('/api/auth/roles', endpointLimiters.auth, authRolesRoutes); // Role-based auth routes (admin/client) — distinct prefix avoids /verify and /logout collisions with legacy authRoutes
+// Authentication routes (unified)
+app.use('/api/auth', endpointLimiters.auth, authUnifiedRoutes);
+app.use('/api/auth-v2', endpointLimiters.auth, (req, res, next) => {
+  res.set('Deprecation', 'true');
+  req.url = `/v2${req.url}`;
+  authUnifiedRoutes(req, res, next);
+});
 
 // Admin routes
 const adminAiRoutes = require('./src/routes/admin-ai');

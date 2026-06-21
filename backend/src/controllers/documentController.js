@@ -1,20 +1,18 @@
-const { PrismaClient } = require('@prisma/client');
 const path = require('path');
 const fs = require('fs').promises;
-const { 
-  documentUpload, 
-  medicalUpload, 
+const prisma = require('../lib/prisma');
+const {
+  documentUpload,
+  medicalUpload,
   generalUpload,
-  validateFile, 
-  cleanupFile, 
-  getFileInfo, 
-  scanFile 
+  validateFile,
+  cleanupFile,
+  getFileInfo,
+  scanFile
 } = require('../middleware/uploadMiddleware');
 const { userCanAccessDocument } = require('../lib/documentAccess');
 const { logDocumentAccess } = require('../lib/documentAudit');
 const { activityTracker } = require('../services/ActivityTrackerService');
-
-const prisma = new PrismaClient();
 
 // Upload document with comprehensive validation and processing
 exports.uploadDocument = async (req, res) => {

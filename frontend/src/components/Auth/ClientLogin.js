@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { fetchWithAuth } from '../../utils/authStorage';
 
 const ClientLogin = () => {
   const navigate = useNavigate();
@@ -56,8 +57,7 @@ const ClientLogin = () => {
     };
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://legalestate.tech/api';
-      const response = await fetch(`${apiUrl}/auth/client/setup-password`, {
+      const response = await fetchWithAuth('/api/auth/client/setup-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

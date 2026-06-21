@@ -37,7 +37,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, loginType = 'admin') => {
     try {
-      const response = await endpoints.auth.login({ email, password });
+      const credentials = loginType === 'client'
+        ? { identifier: email, password }
+        : { email, password };
+      const response = loginType === 'client'
+        ? await endpoints.auth.clientLogin(credentials)
+        : await endpoints.auth.login(credentials);
 
       const { user: userData, client: clientData, loginType: userType } = response;
       const userInfo = userData || clientData;
