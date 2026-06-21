@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
 const AuthUtils = require('../lib/authUtils');
+const { getTokenFromRequest } = require('../lib/authCookies');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
@@ -8,8 +9,7 @@ if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
 // Enhanced authentication middleware
 const authenticateToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const token = getTokenFromRequest(req);
 
     if (!token) {
       return res.status(401).json({
