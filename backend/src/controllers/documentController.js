@@ -11,6 +11,7 @@ const {
   scanFile 
 } = require('../middleware/uploadMiddleware');
 const { userCanAccessDocument } = require('../lib/documentAccess');
+const { logDocumentAccess } = require('../lib/documentAudit');
 const { activityTracker } = require('../services/ActivityTrackerService');
 
 const prisma = new PrismaClient();
@@ -518,6 +519,13 @@ exports.getDocument = async (req, res) => {
       });
     }
 
+    await logDocumentAccess({
+      req,
+      document,
+      action: 'DOCUMENT_VIEW',
+      description: `Viewed document: ${document.filename || document.originalName}`
+    });
+
     // Track document view activity
     await activityTracker.trackActivity({
       caseId: document.caseId?.toString() || null,
@@ -582,6 +590,13 @@ exports.downloadDocument = async (req, res) => {
         message: 'You do not have permission to download this document'
       });
     }
+
+    await logDocumentAccess({
+      req,
+      document,
+      action: 'DOCUMENT_DOWNLOAD',
+      description: `Downloaded document: ${document.filename || document.originalName}`
+    });
 
     const filePath = document.filePath || document.path;
     if (!filePath) {

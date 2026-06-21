@@ -10,6 +10,7 @@ import {
   PlayIcon,
   StopIcon
 } from '../Icons';
+import { fetchWithAuth } from '../../utils/authStorage';
 import WebRTCMeeting from './WebRTCMeeting';
 
 const WebRTCMeetingList = ({ user }) => {
@@ -51,11 +52,7 @@ const WebRTCMeetingList = ({ user }) => {
 
   const fetchMeetings = async () => {
     try {
-      const response = await fetch('/api/webrtc/meetings', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await fetchWithAuth('/api/webrtc/meetings');
       
       if (response.ok) {
         const data = await response.json();
@@ -103,11 +100,10 @@ const WebRTCMeetingList = ({ user }) => {
 
   const createMeeting = async () => {
     try {
-      const response = await fetch('/api/webrtc/meetings', {
+      const response = await fetchWithAuth('/api/webrtc/meetings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(newMeeting)
       });

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { endpoints } from '../utils/api';
+import { clearLegacyAuthStorage } from '../utils/authStorage';
 
 const AuthContext = createContext({});
 
@@ -14,44 +15,34 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // Token is now handled by the API service interceptors
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-    }
-  }, [token]);
+    clearLegacyAuthStorage();
+  }, []);
 
-  // Check if user is authenticated on mount
   useEffect(() => {
     const checkAuth = async () => {
-      if (token) {
-        try {
-          const response = await endpoints.auth.me();
-          setUser(response.user || response);
-        } catch (error) {
-          console.error('Auth verification failed:', error);
-          localStorage.removeItem('token');
-          setToken(null);
-        }
+      try {
+        const response = await endpoints.auth.me();
+        setUser(response.user || response);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();
-  }, [token]);
+  }, []);
 
   const login = async (email, password, loginType = 'admin') => {
     try {
       const response = await endpoints.auth.login({ email, password });
 
-      const { token: authToken, user: userData, client: clientData, loginType: userType } = response;
+      const { user: userData, client: clientData, loginType: userType } = response;
       const userInfo = userData || clientData;
 
-      localStorage.setItem('token', authToken);
-      localStorage.setItem('loginType', userType || loginType);
-      setToken(authToken);
+      clearLegacyAuthStorage();
       setUser(userInfo);
 
       return { success: true, user: userInfo, loginType: userType || loginType };
@@ -64,22 +55,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await endpoints.auth.logout();
+    } catch (error) {
+      // Continue local logout even if API call fails
+    } finally {
+      clearLegacyAuthStorage();
+      setUser(null);
+    }
   };
 
   const register = async (userData) => {
     try {
       const response = await endpoints.auth.register(userData);
-      
-      const { token: authToken, user: newUser } = response;
-      
-      localStorage.setItem('token', authToken);
-      setToken(authToken);
+      const { user: newUser } = response;
+
+      clearLegacyAuthStorage();
       setUser(newUser);
-      
+
       return { success: true, user: newUser };
     } catch (error) {
       console.error('Registration error:', error);

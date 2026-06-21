@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
 const AuthUtils = require('../lib/authUtils');
 const { registrationGuard } = require('../middleware/registrationGuard');
+const { sendAuthResponse, clearAuthCookie, getTokenFromRequest } = require('../lib/authCookies');
 const router = express.Router();
 
 // JWT Secret — crash at startup if not configured
@@ -56,8 +57,7 @@ router.post('/login', async (req, res) => {
 
     // Send response (don't send password)
     const { password: _, ...userWithoutPassword } = user;
-    res.json({
-      success: true,
+    return sendAuthResponse(res, {
       token,
       user: userWithoutPassword
     });
@@ -130,10 +130,10 @@ router.post('/register', registrationGuard, async (req, res) => {
 
     // Send response (don't send password)
     const { password: _, ...userWithoutPassword } = newUser;
-    res.status(201).json({
-      success: true,
+    return sendAuthResponse(res, {
       token,
-      user: userWithoutPassword
+      user: userWithoutPassword,
+      statusCode: 201
     });
 
   } catch (error) {
@@ -148,7 +148,7 @@ router.post('/register', registrationGuard, async (req, res) => {
 // Verify token endpoint
 router.get('/verify', async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const token = getTokenFromRequest(req);
     
     if (!token) {
       return res.status(401).json({ 
@@ -186,7 +186,7 @@ router.get('/verify', async (req, res) => {
 // Get current user (me) endpoint - alias for verify
 router.get('/me', async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const token = getTokenFromRequest(req);
 
     if (!token) {
       return res.status(401).json({
@@ -219,6 +219,14 @@ router.get('/me', async (req, res) => {
       message: 'Invalid token'
     });
   }
+});
+
+router.post('/logout', (req, res) => {
+  clearAuthCookie(res);
+  res.json({
+    success: true,
+    message: 'Logged out successfully'
+  });
 });
 
 module.exports = router;

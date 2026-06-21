@@ -40,6 +40,7 @@ class BaseController {
     }
 
     const result = await APIUtils.paginate(this.model, query);
+    result.data = result.data.map((item) => this.transformResponse(item, req));
     
     const response = APIResponse.paginated(
       result.data,
@@ -70,7 +71,8 @@ class BaseController {
       this.checkOwnership(resource, req.user);
     }
 
-    const response = APIResponse.success(resource, `${this.modelName} retrieved successfully`);
+    const sanitizedResource = this.transformResponse(resource, req);
+    const response = APIResponse.success(sanitizedResource, `${this.modelName} retrieved successfully`);
     res.json(response);
   });
 
@@ -259,6 +261,10 @@ class BaseController {
   });
 
   // Hook methods (to be overridden by child controllers)
+  transformResponse(resource, req) {
+    return resource;
+  }
+
   async beforeCreate(data, req) {
     return data;
   }

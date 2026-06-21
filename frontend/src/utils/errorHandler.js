@@ -1,5 +1,7 @@
 // Error handling utilities for consistent error management across the application
 
+import { clearLegacyAuthStorage } from './authStorage';
+
 export class AppError extends Error {
   constructor(message, statusCode = 500, code = null) {
     super(message);
@@ -309,8 +311,7 @@ export const handleSessionError = (error, logout) => {
       error.response?.status === 401) {
     
     // Clear any stored authentication data
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearLegacyAuthStorage();
     
     // Redirect to login
     if (logout && typeof logout === 'function') {

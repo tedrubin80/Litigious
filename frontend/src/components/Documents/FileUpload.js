@@ -10,7 +10,7 @@ import {
 } from '../Icons';
 import { endpoints } from '../../utils/api';
 import { useToast } from '../Common/Toast';
-import { handleFormError } from '../../utils/errorHandler';
+import { fetchWithAuth } from '../../utils/authStorage';
 
 const FileUpload = ({ 
   onUploadComplete, 
@@ -77,12 +77,9 @@ const FileUpload = ({
         f.id === fileId ? { ...f, status: 'uploading', progress: 0 } : f
       ));
 
-      const response = await fetch('/api/documents/upload', {
+      const response = await fetchWithAuth('/api/documents/upload', {
         method: 'POST',
         body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
       });
 
       if (!response.ok) {
@@ -187,7 +184,7 @@ const FileUpload = ({
       });
 
       xhr.open('POST', '/api/documents/upload');
-      xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
+      xhr.withCredentials = true;
       xhr.send(formData);
     });
   };

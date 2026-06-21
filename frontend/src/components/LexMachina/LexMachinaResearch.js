@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { fetchWithAuth } from '../../utils/authStorage';
 import {
   MagnifyingGlassIcon,
   DocumentIcon,
@@ -92,11 +92,10 @@ const LexMachinaResearch = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/lex-machina/search', {
+      const response = await fetchWithAuth('/api/lex-machina/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           apiKey,
@@ -137,11 +136,10 @@ const LexMachinaResearch = () => {
   const fetchAnalytics = async (entityType, entityId) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/lex-machina/analytics/${entityType}/${entityId}`, {
+      const response = await fetchWithAuth(`/api/lex-machina/analytics/${entityType}/${entityId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ apiKey })
       });

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./src/config/swagger');
@@ -60,7 +61,11 @@ const AuthUtils = require('./src/lib/authUtils');
 const SecurityMiddleware = require('./src/middleware/security');
 const { createSecureStaticMiddleware } = require('./src/middleware/secureStatic');
 const { authenticateToken, requireAdmin } = require('./src/middleware/auth');
+const { httpsEnforcement, shouldEnforceHttps } = require('./src/middleware/httpsEnforcement');
+const { createCorsOptions } = require('./src/config/cors');
 const path = require('path');
+
+app.use(httpsEnforcement);
 
 // Session configuration - supports both HTTP and HTTPS for SSL fallback
 const SESSION_SECRET = process.env.SESSION_SECRET;
@@ -71,54 +76,21 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.FORCE_HTTPS === 'true', // Only force HTTPS if explicitly set
+    secure: shouldEnforceHttps(),
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : false // Allow cross-origin in development
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
   }
 }));
 
 // Initialize comprehensive security middleware
 SecurityMiddleware.initializeAll(app);
 
-// CORS configuration - flexible for HTTP/HTTPS fallback
-const allowedOrigins = [
-  'https://legalestate.tech',
-  'http://legalestate.tech',
-  'https://www.legalestate.tech',
-  'http://www.legalestate.tech',
-  process.env.FRONTEND_URL,
-  process.env.HTTP_FALLBACK_URL || 'http://legalestate.tech',
-  // Development origins
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:3001'
-].filter(Boolean);
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    // In development, allow any localhost origin
-    if (process.env.NODE_ENV !== 'production' && origin.includes('localhost')) {
-      return callback(null, true);
-    }
-    
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With']
-}));
+// CORS configuration
+app.use(cors(createCorsOptions()));
 
 // Body parsing middleware
+app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

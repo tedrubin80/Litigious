@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
+const { getTokenFromRequest } = require('../lib/authCookies');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
 
 const authenticateToken = (req, res, next) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const token = getTokenFromRequest(req);
     
     if (!token) {
       return res.status(401).json({ 

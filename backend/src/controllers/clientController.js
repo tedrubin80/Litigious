@@ -3,6 +3,7 @@ const prisma = require('../lib/prisma');
 const APIResponse = require('../lib/apiResponse');
 const { ErrorHandler, APIError } = require('../middleware/errorHandler');
 const AuthUtils = require('../lib/authUtils');
+const { encryptValue, sanitizeClientPii } = require('../lib/piiEncryption');
 
 class ClientController extends BaseController {
   constructor() {
@@ -48,10 +49,26 @@ class ClientController extends BaseController {
     // Set the createdById from the authenticated user
     data.createdById = req.user.userId;
     
+    if (data.ssn) {
+      data.ssn = encryptValue(data.ssn);
+    }
+
     // Remove userId as Client model doesn't have this field directly
     delete data.userId;
     
     return data;
+  }
+
+  async beforeUpdate(data, req) {
+    if (data.ssn) {
+      data.ssn = encryptValue(data.ssn);
+    }
+    return data;
+  }
+
+  transformResponse(resource, req) {
+    const canRevealPii = ['ADMIN', 'SUPER_ADMIN', 'ATTORNEY'].includes(req.user?.role);
+    return sanitizeClientPii(resource, { reveal: canRevealPii });
   }
 
   // Override afterCreate for activity logging

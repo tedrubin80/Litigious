@@ -91,11 +91,10 @@ class RealTimeService {
       throw new Error(`Unknown data type: ${dataType}`);
     }
 
-    const token = localStorage.getItem('token');
     const apiUrl = process.env.REACT_APP_API_URL || 'https://legalestate.tech/api';
     const response = await fetch(`${apiUrl}${endpoint}`, {
+      credentials: 'include',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });

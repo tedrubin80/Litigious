@@ -268,25 +268,46 @@ const getFileInfo = (file) => {
   };
 };
 
-// Virus scanning placeholder (integrate with actual antivirus solution)
+// Virus scanning with optional ClamAV integration
 const scanFile = async (filePath) => {
-  // This is a placeholder for virus scanning
-  // In production, integrate with antivirus solutions like ClamAV
+  const dangerousExtensions = ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com', '.vbs', '.js'];
+  const fileExt = path.extname(filePath).toLowerCase();
+
+  if (dangerousExtensions.includes(fileExt)) {
+    return { clean: false, threats: ['Potentially dangerous file type detected'] };
+  }
+
+  if (process.env.CLAMAV_ENABLED !== 'true') {
+    return { clean: true, threats: [], scanner: 'extension-check' };
+  }
+
   try {
-    // Simulate virus scan
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Check for potentially dangerous files
-    const dangerousExtensions = ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com', '.vbs', '.js'];
-    const fileExt = path.extname(filePath).toLowerCase();
-    
-    if (dangerousExtensions.includes(fileExt)) {
-      throw new Error('Potentially dangerous file type detected');
+    const { execFile } = require('child_process');
+    const { promisify } = require('util');
+    const execFileAsync = promisify(execFile);
+    const clamscanPath = process.env.CLAMSCAN_PATH || 'clamscan';
+
+    const { stdout } = await execFileAsync(clamscanPath, ['--no-summary', filePath], {
+      timeout: parseInt(process.env.CLAMAV_SCAN_TIMEOUT_MS || '30000', 10)
+    });
+
+    if (stdout.includes('FOUND')) {
+      return { clean: false, threats: [stdout.trim()], scanner: 'clamav' };
     }
-    
-    return { clean: true, threats: [] };
+
+    return { clean: true, threats: [], scanner: 'clamav' };
   } catch (error) {
-    return { clean: false, threats: [error.message] };
+    if (error.code === 'ENOENT') {
+      console.warn('ClamAV enabled but clamscan binary not found; falling back to extension check');
+      return { clean: true, threats: [], scanner: 'extension-check' };
+    }
+
+    if (typeof error.stdout === 'string' && error.stdout.includes('FOUND')) {
+      return { clean: false, threats: [error.stdout.trim()], scanner: 'clamav' };
+    }
+
+    console.error('ClamAV scan failed:', error.message);
+    return { clean: false, threats: ['Unable to verify file safety'] };
   }
 };
 

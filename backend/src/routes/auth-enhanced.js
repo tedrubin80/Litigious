@@ -7,6 +7,7 @@ const SecurityService = require('../services/securityService');
 const { validateSchema } = require('../lib/validation');
 const { ValidationSchemas } = require('../lib/validation');
 const { registrationGuard } = require('../middleware/registrationGuard');
+const { sendAuthResponse, clearAuthCookie } = require('../lib/authCookies');
 
 const router = express.Router();
 
@@ -142,13 +143,14 @@ router.post('/login',
         }
       });
 
-      res.json({
-        success: true,
+      return sendAuthResponse(res, {
         token,
-        refreshToken: session.refreshToken,
         user: AuthUtils.sanitizeUser(user),
-        expiresAt: session.expiresAt,
-        sessionId: session.sessionData.sessionId
+        extra: {
+          refreshToken: session.refreshToken,
+          expiresAt: session.expiresAt,
+          sessionId: session.sessionData.sessionId
+        }
       });
 
     } catch (error) {

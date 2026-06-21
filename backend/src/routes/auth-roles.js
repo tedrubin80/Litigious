@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const AuthUtils = require('../lib/authUtils');
+const { sendAuthResponse, clearAuthCookie } = require('../lib/authCookies');
 const router = express.Router();
 
 const prisma = new PrismaClient();
@@ -120,8 +121,7 @@ router.post('/admin/login', async (req, res) => {
     );
 
     // Return success response
-    res.json({
-      success: true,
+    return sendAuthResponse(res, {
       token,
       user: {
         id: user.id,
@@ -249,8 +249,7 @@ router.post('/client/login', async (req, res) => {
     );
 
     // Return success response
-    res.json({
-      success: true,
+    return sendAuthResponse(res, {
       token,
       user: {
         id: user.id,
@@ -383,9 +382,8 @@ router.post('/client/setup-password', async (req, res) => {
  */
 router.post('/logout', async (req, res) => {
   try {
-    // In a production app, you might want to blacklist the token
-    // or store session information to invalidate
-    
+    clearAuthCookie(res);
+
     res.json({
       success: true,
       message: 'Logged out successfully'

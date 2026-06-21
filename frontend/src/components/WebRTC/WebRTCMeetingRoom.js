@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchWithAuth } from '../../utils/authStorage';
 import WebRTCMeeting from './WebRTCMeeting';
 
 const WebRTCMeetingRoom = () => {
   const { meetingId } = useParams();
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [meeting, setMeeting] = useState(null);
   const [error, setError] = useState(null);
@@ -17,25 +20,16 @@ const WebRTCMeetingRoom = () => {
   const [showJoinForm, setShowJoinForm] = useState(false);
 
   useEffect(() => {
-    // Get user info from localStorage or authentication
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    if (authUser) {
+      setUser(authUser);
     }
 
     fetchMeetingDetails();
-  }, [meetingId]);
+  }, [meetingId, authUser]);
 
   const fetchMeetingDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/webrtc/meetings/${meetingId}`, {
-        headers: token ? {
-          'Authorization': `Bearer ${token}`
-        } : {}
-      });
+      const response = await fetchWithAuth(`/api/webrtc/meetings/${meetingId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -61,18 +55,16 @@ const WebRTCMeetingRoom = () => {
 
   const joinMeeting = async (guestInfo = null) => {
     try {
-      const token = localStorage.getItem('token');
       const requestBody = guestInfo || {};
       
       if (joinForm.password) {
         requestBody.password = joinForm.password;
       }
 
-      const response = await fetch(`/api/webrtc/meetings/${meetingId}/join`, {
+      const response = await fetchWithAuth(`/api/webrtc/meetings/${meetingId}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify(requestBody)
       });

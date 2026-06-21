@@ -9,20 +9,21 @@ const API_TIMEOUT = parseInt(process.env.REACT_APP_API_TIMEOUT || '10000', 10);
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to add authentication token
+// Request interceptor — auth token is sent via httpOnly cookie
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Legacy Bearer token support during migration
+    const legacyToken = localStorage.getItem('token');
+    if (legacyToken && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${legacyToken}`;
     }
 
-    // Add request timestamp for debugging
     config.metadata = { requestStartedAt: new Date().getTime() };
 
     // Log request in development

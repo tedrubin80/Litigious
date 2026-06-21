@@ -37,7 +37,6 @@ class ErrorMonitor extends Component {
 
   logErrorToBackend = async (error, errorInfo, errorId) => {
     try {
-      const token = localStorage.getItem('token');
       const errorData = {
         message: error.toString(),
         stack: error.stack,
@@ -52,8 +51,8 @@ class ErrorMonitor extends Component {
       };
 
       await axios.post('/api/monitoring/errors/client', errorData, {
+        withCredentials: true,
         headers: {
-          'Authorization': token ? `Bearer ${token}` : undefined,
           'Content-Type': 'application/json'
         }
       });

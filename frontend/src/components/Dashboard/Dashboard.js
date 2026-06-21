@@ -16,7 +16,7 @@ import {
   PlusIcon,
 } from '../Icons';
 import InteractiveChart from '../Charts/InteractiveChart';
-import { useToast } from '../Common/Toast';
+import { fetchWithAuth } from '../../utils/authStorage';
 
 // ── Status badge tokens ──────────────────────────────────────────────────────
 const STATUS_STYLES = {
@@ -66,9 +66,7 @@ const Dashboard = () => {
     const load = async () => {
       try {
         setState(p => ({ ...p, loading: true, error: null }));
-        const res = await fetch('/api/dashboard/stats', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        });
+        const res = await fetchWithAuth('/api/dashboard/stats');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const r = await res.json();
         setState({
