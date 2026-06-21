@@ -12,6 +12,7 @@ const {
 } = require('../middleware/uploadMiddleware');
 const { userCanAccessDocument } = require('../lib/documentAccess');
 const { logDocumentAccess } = require('../lib/documentAudit');
+const { buildHtmlPreview, watermarkImage, isImageMime } = require('../lib/documentPreview');
 const { activityTracker } = require('../services/ActivityTrackerService');
 
 // Upload document with comprehensive validation and processing
@@ -649,6 +650,91 @@ exports.downloadDocument = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to download document',
+      error: error.message
+    });
+  }
+};
+
+// Preview document with watermark overlay
+exports.previewDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const document = await prisma.document.findUnique({
+      where: { id }
+    });
+
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found'
+      });
+    }
+
+    const hasAccess = await userCanAccessDocument(req.user, document);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to preview this document'
+      });
+    }
+
+    await logDocumentAccess({
+      req,
+      document,
+      action: 'DOCUMENT_PREVIEW',
+      description: `Previewed document: ${document.filename || document.originalName}`
+    });
+
+    const filePath = document.filePath || document.path;
+    if (!filePath) {
+      return res.status(404).json({
+        success: false,
+        message: 'File path not found'
+      });
+    }
+
+    try {
+      await fs.access(filePath);
+    } catch (error) {
+      return res.status(404).json({
+        success: false,
+        message: 'File not found on disk'
+      });
+    }
+
+    const mimeType = document.fileType || document.mimeType || 'application/octet-stream';
+    const watermarkText = `${req.user.email || 'Authorized User'} · ${new Date().toISOString().slice(0, 10)}`;
+
+    if (isImageMime(mimeType)) {
+      const buffer = await watermarkImage(filePath, watermarkText);
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Cache-Control', 'private, no-store');
+      return res.send(buffer);
+    }
+
+    if (mimeType === 'application/pdf' || mimeType.startsWith('text/')) {
+      const embedUrl = `/api/documents/${document.id}/download`;
+      const html = buildHtmlPreview({
+        title: document.filename || document.originalName || document.title,
+        watermarkText,
+        embedUrl,
+        mimeType
+      });
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'private, no-store');
+      return res.send(html);
+    }
+
+    return res.status(415).json({
+      success: false,
+      message: 'Preview not available for this file type. Use download instead.'
+    });
+  } catch (error) {
+    console.error('Error previewing document:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to preview document',
       error: error.message
     });
   }

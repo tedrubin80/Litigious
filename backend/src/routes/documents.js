@@ -6,6 +6,7 @@ const {
   getDocuments,
   getDocument,
   downloadDocument,
+  previewDocument,
   updateDocument,
   deleteDocument,
   getDocumentStatistics
@@ -21,6 +22,7 @@ router.get('/', getDocuments);
 router.get('/statistics', getDocumentStatistics);
 router.get('/:id', getDocument);
 router.get('/:id/download', downloadDocument);
+router.get('/:id/preview', previewDocument);
 
 // Upload routes (with error handling)
 router.post('/upload', uploadDocument, handleUploadErrors);

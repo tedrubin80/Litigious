@@ -49,8 +49,7 @@ const greet = () => {
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
 const Dashboard = () => {
-  const { user } = useAuth();
-  const toast = useToast();
+  const { user, isClient } = useAuth();
   const [state, setState] = useState({ data: null, loading: true, error: null });
 
   const safeData = useMemo(() => {
@@ -97,6 +96,28 @@ const Dashboard = () => {
   const { stats, cases: recentCases, activities } = safeData;
   const avgCaseValue = stats.totalCases > 0 ? stats.totalRevenue / stats.totalCases : 0;
 
+  const statItems = isClient
+    ? [
+        { label: 'My Cases', value: stats.totalCases, fmt: String, link: '/app/cases' },
+        { label: 'Active', value: stats.activeCases, fmt: String, link: '/app/cases?status=active' },
+        { label: 'Settled', value: stats.settledCases, fmt: String, link: '/app/cases?status=settled' },
+      ]
+    : [
+        { label: 'Total Cases', value: stats.totalCases, fmt: String, link: '/app/cases' },
+        { label: 'Active', value: stats.activeCases, fmt: String, link: '/app/cases?status=active' },
+        { label: 'Revenue', value: stats.totalRevenue, fmt: formatCurrency, link: '/app/reports' },
+        { label: 'Avg Case', value: avgCaseValue, fmt: formatCurrency, link: '/app/reports' },
+      ];
+
+  const quickActions = isClient
+    ? [{ to: '/app/documents', label: '+ View Documents' }]
+    : [
+        { to: '/app/cases/new', label: '+ New Case' },
+        { to: '/app/clients/new', label: '+ Add Client' },
+        { to: '/app/time', label: '+ Log Time' },
+        { to: '/app/documents', label: '+ Upload Doc' },
+      ];
+
   const chartFallback = {
     casesByMonth: ['Jan','Feb','Mar','Apr','May','Jun'].map(month => ({ month, opened: 0, closed: 0, pending: 0 })),
     revenueByType: [{ name: 'Personal Injury', value: 0 }, { name: 'Auto Accident', value: 0 }],
@@ -127,7 +148,7 @@ const Dashboard = () => {
       <div className="flex items-baseline justify-between">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: 'oklch(0.18 0.008 60)', letterSpacing: '-0.01em' }}>
-            {greet()}, {user?.firstName || 'Counselor'}
+            {greet()}, {user?.firstName || (isClient ? 'there' : 'Counselor')}
           </h1>
           <p className="text-xs mt-0.5" style={{ color: 'oklch(0.62 0.005 60)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -144,14 +165,9 @@ const Dashboard = () => {
 
       {/* ── Stat strip — large numbers, no icon medallions, hairline dividers ── */}
       <div className="rounded-lg overflow-hidden" style={surface}>
-        <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0"
+        <div className={`grid divide-x divide-y lg:divide-y-0 ${isClient ? 'grid-cols-3' : 'grid-cols-2 lg:grid-cols-4'}`}
           style={{ borderColor: 'oklch(0.88 0.005 60)' }}>
-          {[
-            { label: 'Total Cases',  value: stats.totalCases,               fmt: String,         link: '/app/cases'               },
-            { label: 'Active',       value: stats.activeCases,              fmt: String,         link: '/app/cases?status=active'  },
-            { label: 'Revenue',      value: stats.totalRevenue,             fmt: formatCurrency, link: '/app/reports'             },
-            { label: 'Avg Case',     value: avgCaseValue,                   fmt: formatCurrency, link: '/app/reports'             },
-          ].map((s, i) => (
+          {statItems.map((s) => (
             <Link
               key={s.label}
               to={s.link}
@@ -182,12 +198,7 @@ const Dashboard = () => {
           style={{ color: 'oklch(0.62 0.005 60)', letterSpacing: '0.07em' }}>
           Quick actions
         </span>
-        {[
-          { to: '/app/cases/new',   label: '+ New Case'   },
-          { to: '/app/clients/new', label: '+ Add Client' },
-          { to: '/app/time',        label: '+ Log Time'   },
-          { to: '/app/documents',   label: '+ Upload Doc' },
-        ].map(({ to, label }) => (
+        {quickActions.map(({ to, label }) => (
           <Link
             key={to}
             to={to}
@@ -323,8 +334,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* ── Charts — full width ────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {/* ── Charts — staff only ───────────────────────────────────────────── */}
+      {!isClient && <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="rounded-lg overflow-hidden" style={surface}>
           <div className="px-5 py-3.5 border-b" style={divider}>
             <h2 className="text-sm font-semibold" style={{ color: 'oklch(0.18 0.008 60)' }}>Cases by Month</h2>
@@ -361,7 +372,7 @@ const Dashboard = () => {
             />
           </div>
         </div>
-      </div>
+      </div>}
 
     </div>
   );

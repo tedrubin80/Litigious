@@ -44,6 +44,14 @@ export const AuthProvider = ({ children }) => {
         ? await endpoints.auth.clientLogin(credentials)
         : await endpoints.auth.login(credentials);
 
+      if (response.requiresTwoFactor) {
+        return {
+          success: false,
+          requiresTwoFactor: true,
+          userId: response.userId
+        };
+      }
+
       const { user: userData, client: clientData, loginType: userType } = response;
       const userInfo = userData || clientData;
 
@@ -89,6 +97,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const verify2FALogin = async (userId, token) => {
+    try {
+      const response = await endpoints.auth.verify2FA({ userId, token });
+      const userInfo = response.user;
+
+      clearLegacyAuthStorage();
+      setUser(userInfo);
+
+      return { success: true, user: userInfo };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Invalid verification code'
+      };
+    }
+  };
+
   const updateUser = (userData) => {
     setUser(prev => ({ ...prev, ...userData }));
   };
@@ -97,6 +122,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
+    verify2FALogin,
     logout,
     register,
     updateUser,

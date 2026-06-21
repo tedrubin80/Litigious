@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
 const AuthUtils = require('../lib/authUtils');
+const SecurityService = require('../services/securityService');
 const { sendAuthResponse, clearAuthCookie, getTokenFromRequest } = require('../lib/authCookies');
 const router = express.Router();
 
@@ -16,7 +17,7 @@ if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
  */
 const handleAdminLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, twoFactorToken } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -87,6 +88,20 @@ const handleAdminLogin = async (req, res) => {
           statusCode: 423,
           type: 'ACCOUNT_LOCKED',
           lockedUntil: user.lockedUntil
+        }
+      });
+    }
+
+    const twoFactorResult = await SecurityService.verify2FAToken(user.id, twoFactorToken);
+    if (twoFactorResult.required && !twoFactorResult.verified) {
+      return res.status(202).json({
+        success: false,
+        requiresTwoFactor: true,
+        userId: user.id,
+        error: {
+          message: 'Two-factor authentication required',
+          statusCode: 202,
+          type: 'TWO_FACTOR_REQUIRED'
         }
       });
     }

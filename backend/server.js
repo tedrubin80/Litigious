@@ -84,6 +84,22 @@ app.use(session({
 // Initialize comprehensive security middleware
 SecurityMiddleware.initializeAll(app);
 
+if (process.env.METRICS_ENABLED === 'true') {
+  const { metricsRouter, metricsMiddleware } = require('./src/routes/metrics');
+  app.use(metricsMiddleware);
+
+  const metricsAuth = (req, res, next) => {
+    const token = process.env.METRICS_TOKEN;
+    if (token && req.headers['x-metrics-token'] !== token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    next();
+  };
+
+  app.use('/metrics', metricsAuth, metricsRouter);
+  console.log('📊 Prometheus metrics enabled at /metrics');
+}
+
 // CORS configuration
 app.use(cors(createCorsOptions()));
 

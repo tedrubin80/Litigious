@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import TwoFactorSettings from './TwoFactorSettings';
 import {
   UserIcon,
   CogIcon,
@@ -220,18 +221,7 @@ const Settings = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        type="checkbox"
-                        className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label className="font-medium text-gray-700">Two-Factor Authentication</label>
-                      <p className="text-gray-500">Add an extra layer of security to your account</p>
-                    </div>
-                  </div>
+                  <TwoFactorSettings />
                 </div>
               </div>
             </div>

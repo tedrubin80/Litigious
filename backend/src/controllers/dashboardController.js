@@ -1,23 +1,68 @@
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../lib/prisma');
 
-const prisma = new PrismaClient();
+const getUserId = (req) => req.user?.userId || req.user?.id;
+
+const buildCaseScope = async (req) => {
+  const userId = getUserId(req);
+  const userRole = req.user?.role;
+  const userEmail = req.user?.email;
+
+  if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+    return {};
+  }
+
+  if (userRole === 'ATTORNEY') {
+    return {
+      OR: [
+        { attorneyId: userId },
+        { secondAttorneyId: userId },
+        { referringAttorneyId: userId }
+      ]
+    };
+  }
+
+  if (userRole === 'PARALEGAL') {
+    return {
+      OR: [
+        { paralegalId: userId },
+        { attorneyId: userId }
+      ]
+    };
+  }
+
+  if (userRole === 'CLIENT') {
+    const client = await prisma.client.findFirst({
+      where: { email: userEmail?.toLowerCase() },
+      select: { id: true }
+    });
+    return client ? { clientId: client.id } : { id: '__none__' };
+  }
+
+  return { id: '__none__' };
+};
+
+const buildActivityScope = async (req) => {
+  const userId = getUserId(req);
+  const userRole = req.user?.role;
+
+  if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+    return {};
+  }
+
+  if (userRole === 'CLIENT') {
+    return { userId };
+  }
+
+  return { userId };
+};
 
 // Get dashboard statistics
 exports.getDashboardStats = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getUserId(req);
     const userRole = req.user.role;
-
-    // Base stats for all users
-    let caseWhere = {};
-    if (userRole === 'ATTORNEY') {
-      caseWhere.attorneyId = userId;
-    } else if (userRole === 'PARALEGAL') {
-      caseWhere.OR = [
-        { paralegalId: userId },
-        { attorneyId: userId }
-      ];
-    }
+    const caseWhere = await buildCaseScope(req);
+    const activityWhere = await buildActivityScope(req);
 
     // Get case statistics
     const totalCases = await prisma.case.count({ where: caseWhere });
@@ -32,9 +77,13 @@ exports.getDashboardStats = async (req, res) => {
     });
 
     // Get client statistics
-    const totalClients = await prisma.client.count();
+    const clientWhere = userRole === 'CLIENT' && caseWhere.clientId
+      ? { id: caseWhere.clientId }
+      : {};
+    const totalClients = await prisma.client.count({ where: clientWhere });
     const newClientsThisMonth = await prisma.client.count({
       where: {
+        ...clientWhere,
         createdAt: {
           gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
         }
@@ -111,7 +160,7 @@ exports.getDashboardStats = async (req, res) => {
 
     // Get recent activity
     const recentActivities = await prisma.activity.findMany({
-      where: userRole === 'ADMIN' ? {} : { userId },
+      where: activityWhere,
       take: 10,
       include: {
         user: {
@@ -125,6 +174,30 @@ exports.getDashboardStats = async (req, res) => {
         createdAt: 'desc'
       }
     });
+
+    const recentCasesRaw = await prisma.case.findMany({
+      where: caseWhere,
+      take: 10,
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        status: true,
+        estimatedValue: true,
+        settlementAmount: true,
+        updatedAt: true
+      }
+    });
+
+    const recentCases = recentCasesRaw.map((caseItem) => ({
+      id: caseItem.id,
+      title: caseItem.title,
+      type: caseItem.type,
+      status: caseItem.status,
+      value: parseFloat(caseItem.settlementAmount || caseItem.estimatedValue || 0),
+      lastActivity: caseItem.updatedAt
+    }));
 
     // Get upcoming deadlines
     const upcomingDeadlines = await prisma.task.findMany({
@@ -200,7 +273,7 @@ exports.getDashboardStats = async (req, res) => {
       },
       // Frontend expects these arrays to always exist
       recentActivity: Array.isArray(recentActivities) ? recentActivities : [],
-      recentCases: [], // Recent cases need to be fetched separately
+      recentCases,
       upcomingDeadlines: Array.isArray(upcomingDeadlines) ? upcomingDeadlines : [],
       
       // Additional metadata
@@ -375,19 +448,9 @@ exports.getCaseAnalytics = async (req, res) => {
 // Get dashboard overview
 exports.getDashboardOverview = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getUserId(req);
     const userRole = req.user.role;
-
-    // Base query filters
-    let caseWhere = {};
-    if (userRole === 'ATTORNEY') {
-      caseWhere.attorneyId = userId;
-    } else if (userRole === 'PARALEGAL') {
-      caseWhere.OR = [
-        { paralegalId: userId },
-        { attorneyId: userId }
-      ];
-    }
+    const caseWhere = await buildCaseScope(req);
 
     // Get case counts
     const activeCases = await prisma.case.count({
@@ -443,12 +506,13 @@ exports.getDashboardOverview = async (req, res) => {
 // Get recent activity
 exports.getRecentActivity = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getUserId(req);
     const userRole = req.user.role;
+    const activityWhere = await buildActivityScope(req);
 
     // Get recent activities
     const activities = await prisma.activity.findMany({
-      where: userRole === 'ADMIN' ? {} : { userId },
+      where: activityWhere,
       take: 15,
       include: {
         user: {
@@ -564,7 +628,7 @@ exports.getUserActivity = async (req, res) => {
 // Get task statistics
 exports.getTaskStatistics = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getUserId(req);
 
     // Get task counts by status
     const pending = await prisma.task.count({

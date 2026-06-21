@@ -8,6 +8,7 @@ const { validateSchema } = require('../lib/validation');
 const { ValidationSchemas } = require('../lib/validation');
 const { registrationGuard } = require('../middleware/registrationGuard');
 const { sendAuthResponse, clearAuthCookie } = require('../lib/authCookies');
+const { authenticateToken: authenticateEnhanced } = require('../middleware/auth-enhanced');
 
 const router = express.Router();
 
@@ -741,6 +742,103 @@ router.post('/logout', async (req, res) => {
 
 // ===== 2FA MANAGEMENT ENDPOINTS =====
 
+// Verify 2FA during login (public — must be registered before auth middleware)
+router.post('/2fa/verify',
+  rateLimiters.login,
+  [
+    body('userId').isLength({ min: 1 }),
+    body('token').isLength({ min: 6, max: 6 }).isNumeric()
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid input',
+          errors: errors.array()
+        });
+      }
+
+      const { userId, token } = req.body;
+      const clientInfo = AuthUtils.extractClientInfo(req);
+
+      const result = await SecurityService.verify2FAToken(userId, token);
+
+      if (!result.verified) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid 2FA token'
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          loginAttempts: 0,
+          lockedUntil: null,
+          lastLogin: new Date()
+        }
+      });
+
+      const session = AuthUtils.generateSession(user);
+      const tokenJwt = AuthUtils.generateJWT(
+        {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+          sessionId: session.sessionData.sessionId
+        },
+        { expiresIn: '24h' }
+      );
+
+      await prisma.activity.create({
+        data: {
+          id: AuthUtils.generateToken(16),
+          action: 'LOGIN_2FA',
+          description: `User logged in with 2FA from ${clientInfo.ip}`,
+          entityType: 'USER',
+          entityId: user.id,
+          userId: user.id,
+          ipAddress: clientInfo.ip,
+          userAgent: clientInfo.userAgent
+        }
+      });
+
+      return sendAuthResponse(res, {
+        token: tokenJwt,
+        user: AuthUtils.sanitizeUser(user),
+        loginType: 'admin',
+        extra: {
+          refreshToken: session.refreshToken,
+          expiresAt: session.expiresAt,
+          sessionId: session.sessionData.sessionId
+        }
+      });
+
+    } catch (error) {
+      console.error('2FA verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  }
+);
+
+router.use('/2fa', authenticateEnhanced);
+
 // Generate 2FA secret (authenticated)
 router.post('/2fa/generate',
   // authenticateToken middleware would go here
@@ -873,101 +971,6 @@ router.post('/2fa/disable',
       res.status(400).json({
         success: false,
         message: error.message || 'Error disabling 2FA'
-      });
-    }
-  }
-);
-
-// Verify 2FA during login (public)
-router.post('/2fa/verify',
-  rateLimiters.login,
-  [
-    body('userId').isLength({ min: 1 }),
-    body('token').isLength({ min: 6, max: 6 }).isNumeric()
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid input',
-          errors: errors.array()
-        });
-      }
-
-      const { userId, token } = req.body;
-      const clientInfo = AuthUtils.extractClientInfo(req);
-
-      const result = await SecurityService.verify2FAToken(userId, token);
-      
-      if (!result.verified) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid 2FA token'
-        });
-      }
-
-      // Get user for session generation
-      const user = await prisma.user.findUnique({
-        where: { id: userId }
-      });
-
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: 'User not found'
-        });
-      }
-
-      // Generate session after successful 2FA
-      const session = AuthUtils.generateSession(user);
-      const token_jwt = AuthUtils.generateJWT(
-        { 
-          userId: user.id, 
-          email: user.email, 
-          role: user.role,
-          sessionId: session.sessionData.sessionId
-        },
-        { expiresIn: '24h' }
-      );
-
-      // Update last login
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          lastLogin: new Date()
-        }
-      });
-
-      // Log successful login with 2FA
-      await prisma.activity.create({
-        data: {
-          id: AuthUtils.generateToken(16),
-          action: 'LOGIN_2FA',
-          description: `User logged in with 2FA from ${clientInfo.ip}`,
-          entityType: 'USER',
-          entityId: user.id,
-          userId: user.id,
-          ipAddress: clientInfo.ip,
-          userAgent: clientInfo.userAgent
-        }
-      });
-
-      res.json({
-        success: true,
-        token: token_jwt,
-        refreshToken: session.refreshToken,
-        user: AuthUtils.sanitizeUser(user),
-        expiresAt: session.expiresAt,
-        sessionId: session.sessionData.sessionId
-      });
-
-    } catch (error) {
-      console.error('2FA verification error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
       });
     }
   }

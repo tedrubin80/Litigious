@@ -219,6 +219,7 @@ export const endpoints = {
   auth: {
     login: (credentials) => apiMethods.post('/auth/login', credentials),
     clientLogin: (credentials) => apiMethods.post('/auth/client/login', credentials),
+    verify2FA: (data) => apiMethods.post('/auth/account/2fa/verify', data),
     logout: () => apiMethods.post('/auth/logout'),
     refresh: (token) => apiMethods.post('/auth/v2/refresh', { token }),
     me: () => apiMethods.get('/auth/me'),
