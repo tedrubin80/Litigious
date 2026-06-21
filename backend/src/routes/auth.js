@@ -2,6 +2,8 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
+const AuthUtils = require('../lib/authUtils');
+const { registrationGuard } = require('../middleware/registrationGuard');
 const router = express.Router();
 
 // JWT Secret — crash at startup if not configured
@@ -69,10 +71,10 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Register endpoint (for admin use)
-router.post('/register', async (req, res) => {
+// Register endpoint (admin-only unless ALLOW_PUBLIC_REGISTRATION=true)
+router.post('/register', registrationGuard, async (req, res) => {
   try {
-    const { email, password, name, role = 'user' } = req.body;
+    const { email, password, name, role = 'PARALEGAL' } = req.body;
 
     // Validate input
     if (!email || !password || !name) {
@@ -94,7 +96,16 @@ router.post('/register', async (req, res) => {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const normalizedRole = String(role).toUpperCase();
+    const allowedRoles = ['PARALEGAL', 'ATTORNEY', 'ASSISTANT', 'CLIENT'];
+    if (!allowedRoles.includes(normalizedRole)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid role for registration'
+      });
+    }
 
     // Create new user
     const newUser = await prisma.user.create({
@@ -102,7 +113,7 @@ router.post('/register', async (req, res) => {
         email,
         password: hashedPassword,
         name,
-        role: role.toUpperCase()
+        role: normalizedRole
       }
     });
 

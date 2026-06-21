@@ -305,21 +305,15 @@ class SecurityMiddleware {
   static securityAuditEndpoint() {
     return async (req, res) => {
       try {
-        // Check if user is admin
-        if (req.user?.role !== 'ADMIN') {
-          return res.status(403).json({
-            success: false,
-            message: 'Admin access required'
-          });
-        }
-
         const { eventType, limit = 50, offset = 0 } = req.query;
+        const parsedLimit = Math.min(parseInt(limit, 10) || 50, 200);
+        const parsedOffset = Math.max(parseInt(offset, 10) || 0, 0);
         
         const auditLogs = await prisma.securityAudit.findMany({
           where: eventType ? { eventType } : {},
           orderBy: { timestamp: 'desc' },
-          take: parseInt(limit),
-          skip: parseInt(offset)
+          take: parsedLimit,
+          skip: parsedOffset
         });
 
         res.json({

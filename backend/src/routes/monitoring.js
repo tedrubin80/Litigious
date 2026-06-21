@@ -5,15 +5,10 @@ const errorMonitor = require('../services/errorMonitor');
 
 // Health check endpoint (no auth required for monitoring services)
 router.get('/health', (req, res) => {
-  const health = {
+  res.json({
     status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    environment: process.env.NODE_ENV
-  };
-  
-  res.json(health);
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Apply auth middleware to protected routes

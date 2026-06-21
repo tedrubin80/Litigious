@@ -10,6 +10,7 @@ const {
   getFileInfo, 
   scanFile 
 } = require('../middleware/uploadMiddleware');
+const { userCanAccessDocument } = require('../lib/documentAccess');
 const { activityTracker } = require('../services/ActivityTrackerService');
 
 const prisma = new PrismaClient();
@@ -509,12 +510,12 @@ exports.getDocument = async (req, res) => {
       });
     }
 
-    // Note: isConfidential field not in schema yet
-    // Check permissions (simplified since isConfidential not available)
-    if (req.user.role !== 'ADMIN' && 
-        document.uploadedBy !== req.user.id) {
-      // For now, allow access if user has case access
-      // TODO: Implement isConfidential field in schema
+    const hasAccess = await userCanAccessDocument(req.user, document);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to view this document'
+      });
     }
 
     // Track document view activity
@@ -573,17 +574,26 @@ exports.downloadDocument = async (req, res) => {
       });
     }
 
-    // Note: isConfidential field not in schema yet
-    // Check permissions (simplified since isConfidential not available)
-    if (req.user.role !== 'ADMIN' && 
-        document.uploadedBy !== req.user.id) {
-      // For now, allow access if user has case access
-      // TODO: Implement isConfidential field in schema
+    // Authorization check before serving file
+    const hasAccess = await userCanAccessDocument(req.user, document);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to download this document'
+      });
+    }
+
+    const filePath = document.filePath || document.path;
+    if (!filePath) {
+      return res.status(404).json({
+        success: false,
+        message: 'File path not found'
+      });
     }
 
     // Check if file exists
     try {
-      await fs.access(document.path);
+      await fs.access(filePath);
     } catch (error) {
       return res.status(404).json({
         success: false,
@@ -614,11 +624,11 @@ exports.downloadDocument = async (req, res) => {
 
     // Set headers for download
     res.setHeader('Content-Disposition', `attachment; filename="${document.filename}"`);
-    res.setHeader('Content-Type', document.mimeType);
-    res.setHeader('Content-Length', document.size);
+    res.setHeader('Content-Type', document.fileType || document.mimeType || 'application/octet-stream');
+    res.setHeader('Content-Length', document.fileSize || document.size);
 
     // Stream file to response
-    const fileStream = require('fs').createReadStream(document.path);
+    const fileStream = require('fs').createReadStream(filePath);
     fileStream.pipe(res);
 
   } catch (error) {

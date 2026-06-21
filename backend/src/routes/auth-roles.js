@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
+const AuthUtils = require('../lib/authUtils');
 const router = express.Router();
 
 const prisma = new PrismaClient();
@@ -284,17 +285,17 @@ router.post('/client/login', async (req, res) => {
 
 /**
  * Client Password Setup/Reset
- * Allows clients to set up their own password
+ * Requires a valid password reset token issued by staff.
  */
 router.post('/client/setup-password', async (req, res) => {
   try {
     const { identifier, newPassword, confirmPassword, verificationCode } = req.body;
 
-    if (!identifier || !newPassword || !confirmPassword) {
+    if (!identifier || !newPassword || !confirmPassword || !verificationCode) {
       return res.status(400).json({
         success: false,
         error: {
-          message: 'All fields are required',
+          message: 'Email, passwords, and verification code are required',
           statusCode: 400,
           type: 'VALIDATION_ERROR'
         }
@@ -312,50 +313,49 @@ router.post('/client/setup-password', async (req, res) => {
       });
     }
 
-    // Password strength validation
-    if (newPassword.length < 8) {
+    const passwordValidation = AuthUtils.validatePasswordStrength(newPassword);
+    if (!passwordValidation.isValid) {
       return res.status(400).json({
         success: false,
         error: {
-          message: 'Password must be at least 8 characters long',
+          message: 'Password does not meet security requirements',
+          statusCode: 400,
+          type: 'VALIDATION_ERROR',
+          details: passwordValidation.errors
+        }
+      });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: identifier.toLowerCase(),
+        role: 'CLIENT',
+        isActive: true,
+        passwordResetToken: verificationCode,
+        passwordResetExpires: { gt: new Date() }
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Invalid or expired verification code',
           statusCode: 400,
           type: 'VALIDATION_ERROR'
         }
       });
     }
 
-    // Find client
-    const client = await prisma.client.findFirst({
-      where: {
-        OR: [
-          { email: identifier.toLowerCase() },
-          { phone: identifier },
-          { cases: { some: { caseNumber: identifier.toUpperCase() } } }
-        ],
-        isActive: true
-      }
-    });
+    const hashedPassword = await AuthUtils.hashPassword(newPassword);
 
-    if (!client) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          message: 'Client not found',
-          statusCode: 404,
-          type: 'NOT_FOUND'
-        }
-      });
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-    // Update client password
-    await prisma.client.update({
-      where: { id: client.id },
+    await prisma.user.update({
+      where: { id: user.id },
       data: {
         password: hashedPassword,
-        passwordSetup: true,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+        emailVerified: true,
         updatedAt: new Date()
       }
     });

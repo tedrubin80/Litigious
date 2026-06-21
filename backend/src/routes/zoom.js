@@ -16,7 +16,10 @@ const zoomRateLimit = rateLimit({
   legacyHeaders: false
 });
 
-// Apply authentication and rate limiting to all routes
+// Zoom webhooks must remain unauthenticated; signature verification happens in the controller
+router.post('/webhook', zoomController.handleWebhook);
+
+// Apply authentication and rate limiting to protected routes
 router.use(authenticateToken);
 router.use(zoomRateLimit);
 
@@ -445,6 +448,4 @@ router.get('/analytics', zoomController.getMeetingAnalytics);
  *       500:
  *         description: Webhook processing failed
  */
-router.post('/webhook', zoomController.handleWebhook);
-
 module.exports = router;

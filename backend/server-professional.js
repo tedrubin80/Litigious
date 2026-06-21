@@ -10,7 +10,7 @@ require('dotenv').config({ path: '.env.professional' });
 const app = express();
 
 // Trust proxy for Nginx reverse proxy
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 // Protocol detection middleware
 app.use((req, res, next) => {
@@ -60,6 +60,9 @@ const aiProfessionalRoutes = require('./src/routes/ai-professional');
 const errorMonitor = require('./src/services/errorMonitor');
 const AuthUtils = require('./src/lib/authUtils');
 const SecurityMiddleware = require('./src/middleware/security');
+const { createSecureStaticMiddleware } = require('./src/middleware/secureStatic');
+const { authenticateToken, requireAdmin } = require('./src/middleware/auth');
+const path = require('path');
 
 // Verify Professional package configuration
 if (process.env.PACKAGE_TYPE !== 'PROFESSIONAL') {
@@ -124,10 +127,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static file serving
-app.use('/uploads', express.static('uploads'));
-app.use('/recordings', express.static(process.env.RECORDINGS_PATH || '/var/www/html/recordings'));
-app.use('/streams', express.static(process.env.STREAMS_PATH || '/var/www/html/streams'));
+// Authenticated static file serving
+app.use('/uploads', ...createSecureStaticMiddleware(path.join(__dirname, 'uploads')));
+app.use('/recordings', ...createSecureStaticMiddleware(process.env.RECORDINGS_PATH || '/var/www/html/recordings', { requireAdmin: true }));
+app.use('/streams', ...createSecureStaticMiddleware(process.env.STREAMS_PATH || '/var/www/html/streams', { requireAdmin: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -160,7 +163,14 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Security endpoints
 app.get('/api/csrf-token', SecurityMiddleware.csrfTokenEndpoint());
-app.get('/api/security/audit', SecurityMiddleware.securityAuditEndpoint());
+app.get('/api/security/audit', authenticateToken, requireAdmin, SecurityMiddleware.securityAuditEndpoint());
+
+app.use((req, res, next) => {
+  if (req.headers.authorization?.startsWith('Bearer ') || req.path.startsWith('/api/')) {
+    return next();
+  }
+  return SecurityMiddleware.createCSRFProtection()(req, res, next);
+});
 
 // Create endpoint-specific rate limiters
 const endpointLimiters = SecurityMiddleware.createEndpointRateLimiters();

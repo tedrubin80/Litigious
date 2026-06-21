@@ -6,6 +6,7 @@ const emailService = require('../services/emailService');
 const SecurityService = require('../services/securityService');
 const { validateSchema } = require('../lib/validation');
 const { ValidationSchemas } = require('../lib/validation');
+const { registrationGuard } = require('../middleware/registrationGuard');
 
 const router = express.Router();
 
@@ -162,6 +163,7 @@ router.post('/login',
 
 // Enhanced registration
 router.post('/register',
+  registrationGuard,
   rateLimiters.register,
   validateSchema(ValidationSchemas.user.create),
   async (req, res) => {
@@ -212,6 +214,15 @@ router.post('/register',
       // Generate email verification token
       const emailVerificationToken = AuthUtils.generateToken();
 
+      const requestedRole = (userData.role || 'PARALEGAL').toUpperCase();
+      const allowedRoles = ['PARALEGAL', 'ATTORNEY', 'ASSISTANT', 'CLIENT'];
+      if (!allowedRoles.includes(requestedRole)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid role for registration'
+        });
+      }
+
       // Create user
       const newUser = await prisma.user.create({
         data: {
@@ -219,7 +230,7 @@ router.post('/register',
           password: hashedPassword,
           emailVerificationToken,
           emailVerified: false,
-          role: userData.role || 'PARALEGAL'
+          role: requestedRole
         }
       });
 

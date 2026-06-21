@@ -58,6 +58,9 @@ const activitiesRoutes = require('./src/routes/activities');
 const errorMonitor = require('./src/services/errorMonitor');
 const AuthUtils = require('./src/lib/authUtils');
 const SecurityMiddleware = require('./src/middleware/security');
+const { createSecureStaticMiddleware } = require('./src/middleware/secureStatic');
+const { authenticateToken, requireAdmin } = require('./src/middleware/auth');
+const path = require('path');
 
 // Session configuration - supports both HTTP and HTTPS for SSL fallback
 const SESSION_SECRET = process.env.SESSION_SECRET;
@@ -119,10 +122,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static file serving
-app.use('/uploads', express.static('uploads')); // Serve uploaded files
-app.use('/recordings', express.static(process.env.RECORDINGS_PATH || '/var/www/html/recordings')); // Serve recordings
-app.use('/streams', express.static(process.env.STREAMS_PATH || '/var/www/html/streams')); // Serve streams
+// Authenticated static file serving (uploads/recordings/streams are not public)
+app.use('/uploads', ...createSecureStaticMiddleware(path.join(__dirname, 'uploads')));
+app.use('/recordings', ...createSecureStaticMiddleware(process.env.RECORDINGS_PATH || '/var/www/html/recordings', { requireAdmin: true }));
+app.use('/streams', ...createSecureStaticMiddleware(process.env.STREAMS_PATH || '/var/www/html/streams', { requireAdmin: true }));
 
 // Request logging middleware with protocol info
 app.use((req, res, next) => {
@@ -156,7 +159,15 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Security endpoints
 app.get('/api/csrf-token', SecurityMiddleware.csrfTokenEndpoint());
-app.get('/api/security/audit', SecurityMiddleware.securityAuditEndpoint());
+app.get('/api/security/audit', authenticateToken, requireAdmin, SecurityMiddleware.securityAuditEndpoint());
+
+// CSRF protection for non-API cookie/session requests
+app.use((req, res, next) => {
+  if (req.headers.authorization?.startsWith('Bearer ') || req.path.startsWith('/api/')) {
+    return next();
+  }
+  return SecurityMiddleware.createCSRFProtection()(req, res, next);
+});
 
 // Routes with endpoint-specific rate limiting
 const endpointLimiters = SecurityMiddleware.createEndpointRateLimiters();
@@ -187,7 +198,7 @@ app.use('/api/collaboration', endpointLimiters.api, collaborationRoutes);
 app.use('/api/zoom', endpointLimiters.api, zoomRoutes);
 app.use('/api/webrtc', endpointLimiters.api, webrtcRoutes);
 app.use('/api/activities', endpointLimiters.api, activitiesRoutes);
-app.use('/api/monitoring', monitoringRoutes);
+app.use('/api/monitoring', endpointLimiters.api, monitoringRoutes);
 
 // Meeting room direct access routes (should be after API routes but before catch-all)
 app.use('/', meetingRoutes);
@@ -348,71 +359,8 @@ app.get('/api/health', (req, res) => {
 app.get('/api/status', (req, res) => {
   res.json({ 
     status: 'operational',
-    version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development'
+    version: '1.0.0'
   });
-});
-
-// Cases API endpoints (protected)
-const { authenticateToken, requireRole } = require('./src/middleware/auth');
-const prisma = require('./src/lib/prisma');
-
-app.get('/api/cases', authenticateToken, async (req, res) => {
-  try {
-    const cases = await prisma.case.findMany({
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    res.json({
-      success: true,
-      cases
-    });
-  } catch (error) {
-    console.error('Error fetching cases:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching cases'
-    });
-  }
-});
-
-app.get('/api/documents', authenticateToken, async (req, res) => {
-  try {
-    const documents = await prisma.document.findMany({
-      include: {
-        case: {
-          select: {
-            clientName: true,
-            caseType: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    res.json({
-      success: true,
-      documents
-    });
-  } catch (error) {
-    console.error('Error fetching documents:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching documents'
-    });
-  }
 });
 
 // Import comprehensive error handling

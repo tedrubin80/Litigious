@@ -1,38 +1,49 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+
 const prisma = new PrismaClient();
 
 async function resetAdminPassword() {
-  console.log('Resetting admin password...');
+  const email = process.argv[2] || process.env.ADMIN_EMAIL || 'admin@legalestate.tech';
+  const password = process.argv[3] || process.env.ADMIN_PASSWORD;
+
+  if (!password) {
+    console.error('Usage: node scripts/reset-admin-password.js <email> <password>');
+    console.error('   or: ADMIN_PASSWORD=secret node scripts/reset-admin-password.js [email]');
+    process.exit(1);
+  }
+
+  console.log(`Resetting admin password for ${email}...`);
 
   try {
-    // Hash the new password
-    const password = 'admin123';
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Update admin user
     const user = await prisma.user.upsert({
-      where: { email: 'admin@legalestate.tech' },
+      where: { email },
       update: {
         password: hashedPassword,
-        role: 'SUPER_ADMIN'
+        role: 'SUPER_ADMIN',
+        isActive: true
       },
       create: {
-        email: 'admin@legalestate.tech',
+        email,
         name: 'System Administrator',
         password: hashedPassword,
-        role: 'SUPER_ADMIN'
+        role: 'SUPER_ADMIN',
+        isActive: true,
+        emailVerified: true
       }
     });
 
-    console.log('✅ Admin password reset successfully!');
+    console.log('Admin password reset successfully.');
     console.log('Email:', user.email);
-    console.log('Password: admin123');
     console.log('Role:', user.role);
 
   } catch (error) {
     console.error('Error resetting password:', error);
+    process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
