@@ -8,6 +8,7 @@ router.use(authenticateToken);
 
 // Dashboard routes
 router.get('/stats', dashboardController.getDashboardStats);
+router.get('/charts', dashboardController.getDashboardCharts);
 router.get('/analytics', dashboardController.getCaseAnalytics);
 router.get('/activity', dashboardController.getUserActivity);
 

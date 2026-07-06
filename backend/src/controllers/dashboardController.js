@@ -1,60 +1,9 @@
 const prisma = require('../lib/prisma');
-
-const getUserId = (req) => req.user?.userId || req.user?.id;
-
-const buildCaseScope = async (req) => {
-  const userId = getUserId(req);
-  const userRole = req.user?.role;
-  const userEmail = req.user?.email;
-
-  if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
-    return {};
-  }
-
-  if (userRole === 'ATTORNEY') {
-    return {
-      OR: [
-        { attorneyId: userId },
-        { secondAttorneyId: userId },
-        { referringAttorneyId: userId }
-      ]
-    };
-  }
-
-  if (userRole === 'PARALEGAL') {
-    return {
-      OR: [
-        { paralegalId: userId },
-        { attorneyId: userId }
-      ]
-    };
-  }
-
-  if (userRole === 'CLIENT') {
-    const client = await prisma.client.findFirst({
-      where: { email: userEmail?.toLowerCase() },
-      select: { id: true }
-    });
-    return client ? { clientId: client.id } : { id: '__none__' };
-  }
-
-  return { id: '__none__' };
-};
-
-const buildActivityScope = async (req) => {
-  const userId = getUserId(req);
-  const userRole = req.user?.role;
-
-  if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
-    return {};
-  }
-
-  if (userRole === 'CLIENT') {
-    return { userId };
-  }
-
-  return { userId };
-};
+const {
+  getUserId,
+  buildCaseScope,
+  buildActivityScope
+} = require('../lib/accessScope');
 
 // Get dashboard statistics
 exports.getDashboardStats = async (req, res) => {
@@ -719,12 +668,101 @@ exports.getTaskStatistics = async (req, res) => {
       metrics: {
         total: pending + inProgress + completed,
         completionRate: Math.round(completionRate),
-        averageCompletionTime: null // Could calculate if needed
+        averageCompletionTime: null
       },
       lastUpdated: new Date().toISOString()
     });
   } catch (error) {
     console.error('Task statistics error:', error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Dashboard chart data formatted for frontend
+exports.getDashboardCharts = async (req, res) => {
+  try {
+    const caseWhere = await buildCaseScope(req);
+    const now = new Date();
+    const monthBuckets = [];
+
+    for (let offset = 5; offset >= 0; offset -= 1) {
+      const start = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+      monthBuckets.push({
+        start,
+        end: new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999),
+        label: start.toLocaleDateString('en-US', { month: 'short' })
+      });
+    }
+
+    const rangeStart = monthBuckets[0].start;
+    const cases = await prisma.case.findMany({
+      where: {
+        ...caseWhere,
+        OR: [
+          { dateOpened: { gte: rangeStart } },
+          { dateClosed: { gte: rangeStart, not: null } },
+          { status: { notIn: ['CLOSED', 'SETTLED', 'ARCHIVED'] } }
+        ]
+      },
+      select: {
+        dateOpened: true,
+        dateClosed: true,
+        status: true,
+        type: true,
+        attorneyFees: true,
+        settlementAmount: true
+      }
+    });
+
+    const casesByMonth = monthBuckets.map(({ start, end, label }) => {
+      const opened = cases.filter((item) => {
+        const openedAt = new Date(item.dateOpened);
+        return openedAt >= start && openedAt <= end;
+      }).length;
+
+      const closed = cases.filter((item) => {
+        if (!item.dateClosed) return false;
+        const closedAt = new Date(item.dateClosed);
+        return closedAt >= start && closedAt <= end;
+      }).length;
+
+      const pending = cases.filter((item) => {
+        const openedAt = new Date(item.dateOpened);
+        return openedAt <= end && !['CLOSED', 'SETTLED', 'ARCHIVED'].includes(item.status);
+      }).length;
+
+      return { month: label, opened, closed, pending };
+    });
+
+    const revenueMap = cases.reduce((acc, item) => {
+      const revenue = parseFloat(item.attorneyFees || item.settlementAmount || 0);
+      if (!revenue) return acc;
+      const key = item.type || 'OTHER';
+      acc[key] = (acc[key] || 0) + revenue;
+      return acc;
+    }, {});
+
+    const revenueByType = Object.entries(revenueMap)
+      .map(([name, value]) => ({
+        name: name.replaceAll('_', ' '),
+        value: Math.round(value)
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 6);
+
+    res.json({
+      casesByMonth,
+      revenueByType,
+      lastUpdated: new Date().toISOString(),
+      success: true
+    });
+  } catch (error) {
+    console.error('Dashboard charts error:', error);
+    res.status(200).json({
+      casesByMonth: [],
+      revenueByType: [],
+      success: false,
+      error: 'Failed to load chart data'
+    });
   }
 };

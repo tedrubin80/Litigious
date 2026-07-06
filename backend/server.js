@@ -6,9 +6,11 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./src/config/swagger');
 const http = require('http');
 const realtimeCollaborationService = require('./src/services/RealtimeCollaborationService');
+const { initErrorTracking, registerErrorHandler } = require('./src/lib/errorTracking');
 require('dotenv').config();
 
 const app = express();
+const Sentry = initErrorTracking(app);
 
 // Trust proxy for Nginx reverse proxy - handles both HTTP and HTTPS
 // Use 1 (not true) to trust exactly one proxy (nginx) — satisfies express-rate-limit's ERR_ERL_PERMISSIVE_TRUST_PROXY
@@ -357,6 +359,7 @@ const { ErrorHandler } = require('./src/middleware/errorHandler');
 
 // Global error handling middleware
 app.use(ErrorHandler.globalErrorHandler());
+registerErrorHandler(app, Sentry);
 
 // 404 handler
 app.use(ErrorHandler.notFoundHandler());

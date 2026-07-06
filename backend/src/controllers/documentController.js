@@ -11,6 +11,7 @@ const {
   scanFile
 } = require('../middleware/uploadMiddleware');
 const { userCanAccessDocument } = require('../lib/documentAccess');
+const { buildDocumentListScope } = require('../lib/accessScope');
 const { logDocumentAccess } = require('../lib/documentAudit');
 const { buildHtmlPreview, watermarkImage, isImageMime } = require('../lib/documentPreview');
 const { activityTracker } = require('../services/ActivityTrackerService');
@@ -104,9 +105,9 @@ exports.uploadDocument = async (req, res) => {
             type: 'OTHER', // Default document type
             description: description || '',
             uploadedBy: req.user.id,
-            caseId: caseId ? parseInt(caseId) : null,
-            clientId: clientId ? parseInt(clientId) : null,
-            version: version ? parseInt(version) : 1,
+            caseId: caseId || null,
+            clientId: clientId || null,
+            version: version ? parseInt(version, 10) : 1,
             metadata: { 
               category: fileCategory || 'general',
               tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
@@ -272,8 +273,8 @@ exports.uploadMultipleDocuments = async (req, res) => {
                 type: 'OTHER',
                 description: req.body.description || '',
                 uploadedBy: req.user.id,
-                caseId: req.body.caseId ? parseInt(req.body.caseId) : null,
-                clientId: req.body.clientId ? parseInt(req.body.clientId) : null,
+                caseId: req.body.caseId || null,
+                clientId: req.body.clientId || null,
                 metadata: { 
                   category: req.body.category || 'general'
                 }
@@ -359,11 +360,11 @@ exports.getDocuments = async (req, res) => {
     }
 
     if (caseId) {
-      where.caseId = parseInt(caseId);
+      where.caseId = caseId;
     }
 
     if (clientId) {
-      where.clientId = parseInt(clientId);
+      where.clientId = clientId;
     }
 
     if (search) {
@@ -394,20 +395,21 @@ exports.getDocuments = async (req, res) => {
     //   where.isConfidential = confidential === 'true';
     // }
 
-    // Check user permissions - only show documents user has access to
-    if (req.user.role !== 'ADMIN') {
-      where.OR = [
-        { uploadedBy: req.user.id },
-        { 
-          case: {
-            OR: [
-              { attorneyId: req.user.id },
-              { paralegalId: req.user.id }
-            ]
-          }
+    const accessScope = await buildDocumentListScope(req);
+    if (accessScope.id === '__none__') {
+      return res.json({
+        success: true,
+        documents: [],
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 0,
+          pages: 0
         }
-      ];
+      });
     }
+
+    Object.assign(where, accessScope);
 
     const [documents, total] = await Promise.all([
       prisma.document.findMany({
@@ -477,7 +479,7 @@ exports.getDocument = async (req, res) => {
     const { id } = req.params;
 
     const document = await prisma.document.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         user: {
           select: {
@@ -571,7 +573,7 @@ exports.downloadDocument = async (req, res) => {
     const { id } = req.params;
 
     const document = await prisma.document.findUnique({
-      where: { id: parseInt(id) }
+      where: { id }
     });
 
     if (!document) {
@@ -754,7 +756,7 @@ exports.updateDocument = async (req, res) => {
     } = req.body;
 
     const document = await prisma.document.findUnique({
-      where: { id: parseInt(id) }
+      where: { id }
     });
 
     if (!document) {
@@ -773,7 +775,7 @@ exports.updateDocument = async (req, res) => {
     }
 
     const updatedDocument = await prisma.document.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: {
         filename: filename || document.filename,
         description: description !== undefined ? description : document.description,
@@ -816,7 +818,7 @@ exports.deleteDocument = async (req, res) => {
     const { id } = req.params;
 
     const document = await prisma.document.findUnique({
-      where: { id: parseInt(id) }
+      where: { id }
     });
 
     if (!document) {
@@ -839,7 +841,7 @@ exports.deleteDocument = async (req, res) => {
 
     // Delete from database
     await prisma.document.delete({
-      where: { id: parseInt(id) }
+      where: { id }
     });
 
     // Track document deletion activity
@@ -901,8 +903,8 @@ exports.getDocumentStatistics = async (req, res) => {
       }
     };
 
-    if (caseId) where.caseId = parseInt(caseId);
-    if (clientId) where.clientId = parseInt(clientId);
+    if (caseId) where.caseId = caseId;
+    if (clientId) where.clientId = clientId;
 
     const [
       totalDocuments,

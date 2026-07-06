@@ -8,6 +8,7 @@ node_modules/
 .env.*
 !.env.example
 !.env.staging.example
+!frontend/.env.example
 
 # Sensitive docs
 *CREDENTIALS*.md
@@ -23,7 +24,10 @@ logs/
 *.log
 npm-debug.log*
 
-# Runtime / OS
+# Runtime uploads (seed script creates demo samples locally)
+backend/uploads/**
+!backend/uploads/demo/
+!backend/uploads/demo/.gitkeep
 .DS_Store
 Thumbs.db
 

@@ -594,7 +594,7 @@ router.post('/resend-verification',
 
 // Change password (authenticated)
 router.post('/change-password',
-  // authenticateToken middleware would go here
+  authenticateEnhanced,
   [
     body('currentPassword').isLength({ min: 1 }),
     body('newPassword').isLength({ min: 8 })

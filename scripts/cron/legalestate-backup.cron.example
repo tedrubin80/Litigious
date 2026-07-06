@@ -1,0 +1,8 @@
+# Daily encrypted database backup at 2:15 AM
+# Install: sudo cp scripts/cron/legalestate-backup.cron.example /etc/cron.d/legalestate-backup
+# Set env in /etc/cron.d/legalestate-backup or source from /var/www/ld/backend/.env
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+15 2 * * * deploy cd /var/www/ld && set -a && source backend/.env && set +a && ./scripts/backup-database.sh >> /var/log/legalestate-backup.log 2>&1

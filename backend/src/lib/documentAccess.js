@@ -1,6 +1,5 @@
 const prisma = require('./prisma');
-
-const ADMIN_ROLES = new Set(['ADMIN', 'SUPER_ADMIN']);
+const { ADMIN_ROLES, getUserId, resolveClientForUser } = require('./accessScope');
 
 const userCanAccessDocument = async (user, document) => {
   if (!user || !document) {
@@ -11,7 +10,9 @@ const userCanAccessDocument = async (user, document) => {
     return true;
   }
 
-  if (document.uploadedBy === user.id || document.uploadedBy === user.userId) {
+  const userId = getUserId(user);
+
+  if (document.uploadedBy === userId) {
     return true;
   }
 
@@ -19,19 +20,27 @@ const userCanAccessDocument = async (user, document) => {
     return false;
   }
 
+  if (user.role === 'CLIENT') {
+    const client = await resolveClientForUser(user);
+    if (!client) {
+      return false;
+    }
+
+    const linkedCase = await prisma.case.findFirst({
+      where: { id: document.caseId, clientId: client.id },
+      select: { id: true }
+    });
+    return Boolean(linkedCase);
+  }
+
   const caseAccess = await prisma.case.findFirst({
     where: {
       id: document.caseId,
       OR: [
-        { attorneyId: user.id || user.userId },
-        { paralegalId: user.id || user.userId },
-        ...(user.role === 'ATTORNEY' ? [{
-          paralegal: {
-            assignedCases: {
-              some: { attorneyId: user.id || user.userId }
-            }
-          }
-        }] : [])
+        { attorneyId: userId },
+        { paralegalId: userId },
+        { secondAttorneyId: userId },
+        { referringAttorneyId: userId }
       ]
     },
     select: { id: true }

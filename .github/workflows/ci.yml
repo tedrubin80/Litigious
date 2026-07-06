@@ -22,7 +22,7 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=high
         continue-on-error: true
-      - run: npm test -- --passWithNoTests --testPathPatterns="basic-validation|auth.mock"
+      - run: npm test -- --passWithNoTests --testPathPatterns="basic-validation|auth.mock|access-scope"
         env:
           JWT_SECRET: ci-test-jwt-secret-min-32-characters-long
           SESSION_SECRET: ci-test-session-secret-min-32-chars

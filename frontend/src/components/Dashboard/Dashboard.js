@@ -51,6 +51,10 @@ const greet = () => {
 const Dashboard = () => {
   const { user, isClient } = useAuth();
   const [state, setState] = useState({ data: null, loading: true, error: null });
+  const [chartData, setChartData] = useState({
+    casesByMonth: [],
+    revenueByType: []
+  });
 
   const safeData = useMemo(() => {
     const d = state.data;
@@ -81,6 +85,17 @@ const Dashboard = () => {
           },
           loading: false, error: null,
         });
+
+        if (!isClient) {
+          const chartsRes = await fetchWithAuth('/api/dashboard/charts');
+          if (chartsRes.ok) {
+            const charts = await chartsRes.json();
+            setChartData({
+              casesByMonth: Array.isArray(charts.casesByMonth) ? charts.casesByMonth : [],
+              revenueByType: Array.isArray(charts.revenueByType) ? charts.revenueByType : []
+            });
+          }
+        }
       } catch (err) {
         setState({
           data: { cases: [], activities: [], stats: { totalCases: 0, activeCases: 0, settledCases: 0, totalRevenue: 0 } },
@@ -91,7 +106,7 @@ const Dashboard = () => {
     load();
     const iv = setInterval(load, 30000);
     return () => clearInterval(iv);
-  }, []);
+  }, [isClient]);
 
   const { stats, cases: recentCases, activities } = safeData;
   const avgCaseValue = stats.totalCases > 0 ? stats.totalRevenue / stats.totalCases : 0;
@@ -119,8 +134,12 @@ const Dashboard = () => {
       ];
 
   const chartFallback = {
-    casesByMonth: ['Jan','Feb','Mar','Apr','May','Jun'].map(month => ({ month, opened: 0, closed: 0, pending: 0 })),
-    revenueByType: [{ name: 'Personal Injury', value: 0 }, { name: 'Auto Accident', value: 0 }],
+    casesByMonth: chartData.casesByMonth.length > 0
+      ? chartData.casesByMonth
+      : ['Jan','Feb','Mar','Apr','May','Jun'].map(month => ({ month, opened: 0, closed: 0, pending: 0 })),
+    revenueByType: chartData.revenueByType.length > 0
+      ? chartData.revenueByType
+      : [{ name: 'No revenue data', value: 0 }],
   };
 
   // ── Shared surface style

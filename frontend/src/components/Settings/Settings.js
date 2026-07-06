@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import TwoFactorSettings from './TwoFactorSettings';
+import { endpoints } from '../../utils/api';
+import { useToast } from '../Common/Toast';
 import {
   UserIcon,
   CogIcon,
@@ -11,7 +13,37 @@ import {
 
 const Settings = () => {
   const { user } = useAuth();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('profile');
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await endpoints.auth.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      toast.success('Password updated successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update password');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: UserIcon },
@@ -195,13 +227,16 @@ const Settings = () => {
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Security Settings</h3>
                 <div className="space-y-6">
-                  <div>
+                  <form onSubmit={handlePasswordChange}>
                     <h4 className="text-md font-medium text-gray-900 mb-2">Change Password</h4>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Current Password</label>
                         <input
                           type="password"
+                          required
+                          value={passwordForm.currentPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -209,6 +244,10 @@ const Settings = () => {
                         <label className="block text-sm font-medium text-gray-700">New Password</label>
                         <input
                           type="password"
+                          required
+                          minLength={8}
+                          value={passwordForm.newPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -216,11 +255,22 @@ const Settings = () => {
                         <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
                         <input
                           type="password"
+                          required
+                          minLength={8}
+                          value={passwordForm.confirmPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
+                      <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {passwordLoading ? 'Updating...' : 'Update Password'}
+                      </button>
                     </div>
-                  </div>
+                  </form>
                   <TwoFactorSettings />
                 </div>
               </div>
@@ -232,26 +282,10 @@ const Settings = () => {
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">API Keys</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Manage API keys for integrating with third-party services.
+                  Programmatic API keys are planned for a future release. Contact your administrator for integration access today.
                 </p>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-4 border rounded-lg">
-                    <div>
-                      <div className="font-medium">Production API Key</div>
-                      <div className="text-sm text-gray-500">Created on Jan 15, 2024</div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-500 text-sm font-medium">
-                        Regenerate
-                      </button>
-                      <button className="text-red-600 hover:text-red-500 text-sm font-medium">
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                  <button className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                    Generate New API Key
-                  </button>
+                <div className="rounded-lg border border-dashed border-gray-300 p-6 text-sm text-gray-500">
+                  No API keys are configured for your account.
                 </div>
               </div>
             </div>

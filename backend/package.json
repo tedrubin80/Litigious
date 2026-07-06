@@ -19,7 +19,11 @@
     "test:env": "node ../scripts/test-env.js",
     "test:dependencies": "node ../scripts/test-dependencies.js",
     "test:db-connection": "node ../scripts/test-db-connection.js",
-    "test:all": "npm run test:setup && npm run test:env && npm run test:dependencies && npm run test:db-connection && npm run test:coverage"
+    "test:all": "npm run test:setup && npm run test:env && npm run test:dependencies && npm run test:db-connection && npm run test:coverage",
+    "seed:demo": "node scripts/seed-demo-data.js"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",

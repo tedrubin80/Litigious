@@ -1,4 +1,10 @@
 const prisma = require('../lib/prisma');
+const {
+  getUserId,
+  buildCaseScope,
+  userCanAccessCase,
+  sanitizeCaseForClient
+} = require('../lib/accessScope');
 
 // Generate case number
 const generateCaseNumber = () => {
@@ -41,6 +47,9 @@ exports.getCases = async (req, res) => {
       ];
     } else if (role === 'PARALEGAL') {
       where.paralegalId = userId;
+    } else if (role === 'CLIENT') {
+      const caseScope = await buildCaseScope(req);
+      Object.assign(where, caseScope);
     } else {
       return res.status(403).json({
         success: false,
@@ -217,7 +226,19 @@ exports.getCaseById = async (req, res) => {
       return res.status(404).json({ error: 'Case not found' });
     }
 
-    res.json(caseData);
+    const canAccess = await userCanAccessCase(req.user, caseData);
+    if (!canAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to view this case'
+      });
+    }
+
+    const payload = req.user.role === 'CLIENT'
+      ? sanitizeCaseForClient(caseData)
+      : caseData;
+
+    res.json(payload);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

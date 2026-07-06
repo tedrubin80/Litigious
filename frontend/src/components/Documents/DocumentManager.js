@@ -15,10 +15,12 @@ import {
 } from '../Icons';
 import FileUpload from './FileUpload';
 import { endpoints } from '../../utils/api';
+import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../Common/Toast';
 import { handleFormError } from '../../utils/errorHandler';
 
 const DocumentManager = () => {
+  const { isClient } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,7 +111,17 @@ const DocumentManager = () => {
   };
 
   const handleUploadError = (error, file) => {
-    toast.error(`Failed to upload ${file.name}: ${error.message}`);
+    const message = error.message || 'Upload failed';
+    if (message.toLowerCase().includes('security scan') || message.toLowerCase().includes('threat')) {
+      toast.error(`Security scan blocked ${file.name}. The file may contain malware.`);
+      return;
+    }
+    toast.error(`Failed to upload ${file.name}: ${message}`);
+  };
+
+  const handlePreview = (document) => {
+    const previewUrl = document.previewUrl || `/api/documents/${document.id}/preview`;
+    window.open(previewUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleDownload = async (document) => {
@@ -193,6 +205,7 @@ const DocumentManager = () => {
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
+          {!isClient && (
           <button
             onClick={() => setShowUpload(!showUpload)}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -200,11 +213,12 @@ const DocumentManager = () => {
             <CloudArrowUpIcon className="h-4 w-4 mr-2" />
             Upload Documents
           </button>
+          )}
         </div>
       </div>
 
       {/* Upload Section */}
-      {showUpload && (
+      {showUpload && !isClient && (
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="mb-4">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Documents</h3>
@@ -408,13 +422,15 @@ const DocumentManager = () => {
                           </button>
                           
                           <button
-                            onClick={() => console.log('Preview:', document)}
+                            onClick={() => handlePreview(document)}
                             className="text-gray-600 hover:text-gray-700"
                             title="Preview"
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
-                          
+
+                          {!isClient && (
+                            <>
                           <button
                             onClick={() => console.log('Edit:', document)}
                             className="text-gray-600 hover:text-gray-700"
@@ -430,6 +446,8 @@ const DocumentManager = () => {
                           >
                             <TrashIcon className="h-4 w-4" />
                           </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
