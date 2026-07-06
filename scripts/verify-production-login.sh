@@ -19,10 +19,10 @@ echo
 
 # Test accounts
 declare -a accounts=(
-  "admin@legalestate.tech:admin123:SUPER_ADMIN"
-  "attorney@legalestate.tech:attorney123:ADMIN"
-  "paralegal@legalestate.tech:paralegal123:PARALEGAL"
-  "client@legalestate.tech:client123:CLIENT"
+  "admin@litigious.online:admin123:SUPER_ADMIN"
+  "attorney@litigious.online:attorney123:ADMIN"
+  "paralegal@litigious.online:paralegal123:PARALEGAL"
+  "client@litigious.online:client123:CLIENT"
 )
 
 success_count=0

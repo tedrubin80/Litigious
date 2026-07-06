@@ -27,7 +27,7 @@ async function createProductionAdmin() {
 
   try {
     // Get admin details
-    const email = await question('Admin Email (default: admin@legalestate.tech): ') || 'admin@legalestate.tech';
+    const email = await question('Admin Email (default: admin@litigious.online): ') || 'admin@litigious.online';
     const name = await question('Admin Name (default: System Administrator): ') || 'System Administrator';
     const password = await question('Admin Password (default: admin123): ') || 'admin123';
 

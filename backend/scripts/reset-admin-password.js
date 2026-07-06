@@ -6,7 +6,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const prisma = new PrismaClient();
 
 async function resetAdminPassword() {
-  const email = process.argv[2] || process.env.ADMIN_EMAIL || 'admin@legalestate.tech';
+  const email = process.argv[2] || process.env.ADMIN_EMAIL || 'admin@litigious.online';
   const password = process.argv[3] || process.env.ADMIN_PASSWORD;
 
   if (!password) {

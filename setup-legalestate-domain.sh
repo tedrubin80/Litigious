@@ -5,7 +5,7 @@
 
 set -e
 
-echo "=== Legal Estate Domain Setup for legalestate.tech ==="
+echo "=== Legal Estate Domain Setup for litigious.online ==="
 
 # Create log directory
 echo "Creating log directory..."
@@ -14,13 +14,13 @@ chown -R www-data:www-data /var/www/ld/logs
 
 # Create nginx configuration
 echo "Creating nginx configuration..."
-cat > /etc/nginx/sites-available/legalestate.tech <<'NGINX_CONFIG'
+cat > /etc/nginx/sites-available/litigious.online <<'NGINX_CONFIG'
 # Legal Estate Platform - Main Site Configuration
 server {
     listen 80;
     listen [::]:80;
 
-    server_name legalestate.tech www.legalestate.tech;
+    server_name litigious.online www.litigious.online;
 
     root /var/www/ld/frontend/build;
     index index.html;
@@ -145,7 +145,7 @@ NGINX_CONFIG
 
 # Enable the site
 echo "Enabling site..."
-ln -sf /etc/nginx/sites-available/legalestate.tech /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/litigious.online /etc/nginx/sites-enabled/
 
 # Test nginx configuration
 echo "Testing nginx configuration..."
@@ -159,12 +159,12 @@ echo ""
 echo "=== Setup Complete! ==="
 echo ""
 echo "Site is now configured for:"
-echo "  - http://legalestate.tech"
-echo "  - http://www.legalestate.tech"
+echo "  - https://litigious.online"
+echo "  - https://www.litigious.online"
 echo ""
 echo "Next steps:"
 echo "  1. Make sure your DNS points to this server"
-echo "  2. Run: sudo certbot --nginx -d legalestate.tech -d www.legalestate.tech"
+echo "  2. Run: sudo certbot --nginx -d litigious.online -d www.litigious.online"
 echo "     to set up SSL certificate"
 echo ""
 echo "Backend should be running on port 3001"

@@ -8,25 +8,25 @@ async function createProductionUsers() {
 
   const users = [
     {
-      email: 'admin@legalestate.tech',
+      email: 'admin@litigious.online',
       name: 'System Administrator',
       password: 'admin123',
       role: 'SUPER_ADMIN'
     },
     {
-      email: 'attorney@legalestate.tech',
+      email: 'attorney@litigious.online',
       name: 'John Attorney',
       password: 'attorney123',
       role: 'ADMIN'
     },
     {
-      email: 'paralegal@legalestate.tech',
+      email: 'paralegal@litigious.online',
       name: 'Sarah Paralegal',
       password: 'paralegal123',
       role: 'PARALEGAL'
     },
     {
-      email: 'client@legalestate.tech',
+      email: 'client@litigious.online',
       name: 'Demo Client',
       password: 'client123',
       role: 'CLIENT'
@@ -59,16 +59,16 @@ async function createProductionUsers() {
     console.log('Production Users Created:');
     console.log('=================================');
     console.log('\n🔑 Admin Account:');
-    console.log('   Email: admin@legalestate.tech');
+    console.log('   Email: admin@litigious.online');
     console.log('   Password: admin123');
     console.log('\n👨‍⚖️ Attorney Account:');
-    console.log('   Email: attorney@legalestate.tech');
+    console.log('   Email: attorney@litigious.online');
     console.log('   Password: attorney123');
     console.log('\n👩‍💼 Paralegal Account:');
-    console.log('   Email: paralegal@legalestate.tech');
+    console.log('   Email: paralegal@litigious.online');
     console.log('   Password: paralegal123');
     console.log('\n👤 Client Account:');
-    console.log('   Email: client@legalestate.tech');
+    console.log('   Email: client@litigious.online');
     console.log('   Password: client123');
     console.log('\n⚠️  Please change these passwords in production!');
 

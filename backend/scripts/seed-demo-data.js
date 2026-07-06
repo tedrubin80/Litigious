@@ -87,7 +87,7 @@ async function seedDemoData() {
 
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@legalestate.tech',
+      email: 'admin@litigious.online',
       password: passwordHash,
       name: 'Alex Morgan',
       firstName: 'Alex',
@@ -101,7 +101,7 @@ async function seedDemoData() {
 
   const attorney = await prisma.user.create({
     data: {
-      email: 'attorney@legalestate.tech',
+      email: 'attorney@litigious.online',
       password: passwordHash,
       name: 'Jordan Reed',
       firstName: 'Jordan',
@@ -117,7 +117,7 @@ async function seedDemoData() {
 
   const paralegal = await prisma.user.create({
     data: {
-      email: 'paralegal@legalestate.tech',
+      email: 'paralegal@litigious.online',
       password: passwordHash,
       name: 'Sam Rivera',
       firstName: 'Sam',
@@ -132,7 +132,7 @@ async function seedDemoData() {
 
   const clientUser = await prisma.user.create({
     data: {
-      email: 'client@legalestate.tech',
+      email: 'client@litigious.online',
       password: passwordHash,
       name: 'Maria Chen',
       firstName: 'Maria',
@@ -149,7 +149,7 @@ async function seedDemoData() {
       data: {
         firstName: 'Maria',
         lastName: 'Chen',
-        email: 'client@legalestate.tech',
+        email: 'client@litigious.online',
         phone: '(555) 200-0101',
         city: 'Los Angeles',
         state: 'CA',
@@ -442,10 +442,10 @@ async function seedDemoData() {
   console.log('');
   console.log('🔐 Login credentials (all use the same password):');
   console.log(`   Password: ${DEMO_PASSWORD}`);
-  console.log('   Staff admin:    admin@legalestate.tech');
-  console.log('   Attorney:       attorney@legalestate.tech');
-  console.log('   Paralegal:      paralegal@legalestate.tech');
-  console.log('   Client portal:  client@legalestate.tech');
+  console.log('   Staff admin:    admin@litigious.online');
+  console.log('   Attorney:       attorney@litigious.online');
+  console.log('   Paralegal:      paralegal@litigious.online');
+  console.log('   Client portal:  client@litigious.online');
   console.log('');
   console.log('📊 Seeded:');
   console.log(`   Users: ${4} | Clients: ${clients.length} | Cases: ${cases.length}`);

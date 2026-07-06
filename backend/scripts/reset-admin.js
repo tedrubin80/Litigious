@@ -2,7 +2,7 @@
 /**
  * Creates or resets the admin user.
  * Usage: node scripts/reset-admin.js [email] [password]
- * Defaults: admin@legalestate.tech / (prompted or env ADMIN_PASSWORD)
+ * Defaults: admin@litigious.online / (prompted or env ADMIN_PASSWORD)
  */
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
@@ -12,7 +12,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.argv[2] || 'admin@legalestate.tech';
+  const email = process.argv[2] || 'admin@litigious.online';
   const password = process.argv[3] || process.env.ADMIN_PASSWORD;
 
   if (!password) {
@@ -42,7 +42,7 @@ async function main() {
   });
 
   console.log(`Admin user ready: ${user.email} (id: ${user.id})`);
-  console.log('Login at: https://legalestate.tech/admin/login');
+  console.log('Login at: https://litigious.online/admin/login');
 }
 
 main()

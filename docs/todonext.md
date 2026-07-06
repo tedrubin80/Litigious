@@ -65,7 +65,7 @@ const endpoint = '/auth/login';
 
 **Changes**:
 - Backend: Standardized to port 3000
-- Frontend: All API calls point to `https://legalestate.tech/api`
+- Frontend: All API calls point to `https://litigious.online/api`
 - Fixed environment variables in backend `.env`
 
 ### 4. **CORS Configuration**
@@ -80,8 +80,8 @@ const endpoint = '/auth/login';
 origin: [
     'http://localhost:3000', 
     'http://localhost:3001',
-    'https://legalestate.tech',      // Added
-    'http://legalestate.tech',       // Added
+    'https://litigious.online',      // Added
+    'https://litigious.online',       // Added
     process.env.FRONTEND_URL
 ].filter(Boolean)
 ```
@@ -100,7 +100,7 @@ origin: [
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 // After:
-const API_BASE_URL = 'https://legalestate.tech/api';
+const API_BASE_URL = 'https://litigious.online/api';
 ```
 
 ### 6. **Dashboard API Endpoints Missing**
@@ -162,7 +162,7 @@ const activitiesLoading = false;
 ## Authentication Credentials
 
 ### Working Credentials:
-- **Primary Admin**: `admin@legalestate.tech` / `AdminLegalTech2024`
+- **Primary Admin**: `admin@litigious.online` / `AdminLegalTech2024`
 - **Test User**: `admin@example.com` / `admin123`
 
 ### Database Users:
@@ -173,7 +173,7 @@ Current user count: 3 users in system
 ## Testing Tools Created
 
 ### 1. **Direct Authentication Test Page**
-**Location**: `https://legalestate.tech/auth-test.html`
+**Location**: `https://litigious.online/auth-test.html`
 **Purpose**: Bypass React complexity to test API directly
 **Features**:
 - Direct API calls to `/auth/login`
@@ -182,7 +182,7 @@ Current user count: 3 users in system
 - Detailed error/success reporting
 
 ### 2. **Environment Debug Page**
-**Location**: `https://legalestate.tech/env-debug.html`
+**Location**: `https://litigious.online/env-debug.html`
 **Purpose**: Debug React environment variable loading
 **Features**:
 - Display embedded environment variables
@@ -226,7 +226,7 @@ Current user count: 3 users in system
 - Port: 3000
 - Environment: production
 - Database: PostgreSQL (28 tables)
-- API Base: `https://legalestate.tech/api`
+- API Base: `https://litigious.online/api`
 
 ### **Frontend**:
 - Build: React production build

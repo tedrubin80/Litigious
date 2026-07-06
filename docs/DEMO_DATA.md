@@ -23,12 +23,12 @@ After seeding, all demo accounts share the same password (default **`DemoShow202
 
 | Role | Email |
 |------|-------|
-| Super Admin | `admin@legalestate.tech` |
-| Attorney | `attorney@legalestate.tech` |
-| Paralegal | `paralegal@legalestate.tech` |
-| Client portal | `client@legalestate.tech` |
+| Super Admin | `admin@litigious.online` |
+| Attorney | `attorney@litigious.online` |
+| Paralegal | `paralegal@litigious.online` |
+| Client portal | `client@litigious.online` |
 
-Use **Admin login** for staff accounts and **Client Portal** for `client@legalestate.tech`.
+Use **Admin login** for staff accounts and **Client Portal** for `client@litigious.online`.
 
 ## What gets populated
 

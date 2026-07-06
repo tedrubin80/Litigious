@@ -91,7 +91,7 @@ class RealTimeService {
       throw new Error(`Unknown data type: ${dataType}`);
     }
 
-    const apiUrl = process.env.REACT_APP_API_URL || 'https://legalestate.tech/api';
+    const apiUrl = process.env.REACT_APP_API_URL || 'https://litigious.online/api';
     const response = await fetch(`${apiUrl}${endpoint}`, {
       credentials: 'include',
       headers: {

@@ -98,7 +98,7 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boo
 const defaultOrigins = [
   'http://localhost:3031', // Professional frontend port
   'http://127.0.0.1:3031',
-  'https://professional.legalestate.tech'
+  'https://professional.litigious.online'
 ];
 
 const allOrigins = [...new Set([...allowedOrigins, ...defaultOrigins])];

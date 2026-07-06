@@ -256,7 +256,7 @@ verify_reset() {
     if node -e "
         const { PrismaClient } = require('@prisma/client');
         const prisma = new PrismaClient();
-        prisma.user.findFirst({where: {email: 'demo@legalestate.tech'}})
+        prisma.user.findFirst({where: {email: 'demo@litigious.online'}})
         .then(user => {
             if (user) {
                 console.log('Demo admin user found');
@@ -303,7 +303,7 @@ send_notification() {
     log_message "INFO" "Demo reset notification: $message"
 
     # You can add email notification here if needed
-    # echo "$message" | mail -s "Demo Reset Complete" admin@legalestate.tech
+    # echo "$message" | mail -s "Demo Reset Complete" admin@litigious.online
 
     print_success "Reset notification logged"
 }

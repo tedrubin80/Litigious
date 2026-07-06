@@ -112,6 +112,6 @@ Before switching to production mode, ensure:
 ## Support
 
 For issues or questions:
-- **Email**: support@legalestate.tech
+- **Email**: support@litigious.online
 - **Logs**: Check respective log files in `/var/www/html/logs/`
 - **Status**: Use the appropriate management script status command

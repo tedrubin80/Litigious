@@ -16,7 +16,7 @@ class EmailService {
   async sendEmail({ to, subject, html, text }) {
     try {
       const { data, error } = await this.resend.emails.send({
-        from: process.env.FROM_EMAIL || 'Legal Estate <noreply@legalestate.tech>',
+        from: process.env.FROM_EMAIL || 'Legal Estate <noreply@litigious.online>',
         to: Array.isArray(to) ? to : [to],
         subject,
         html

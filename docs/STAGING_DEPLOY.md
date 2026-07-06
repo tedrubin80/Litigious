@@ -8,7 +8,7 @@ Copy `backend/.env.staging.example` to your staging secrets manager and set:
 
 - Unique `JWT_SECRET`, `SESSION_SECRET`, `PII_ENCRYPTION_KEY`, `BACKUP_PASSPHRASE`
 - `DATABASE_URL` pointing at staging Postgres
-- `FRONTEND_URL` / `ALLOWED_ORIGINS` = `https://staging.legalestate.tech`
+- `FRONTEND_URL` / `ALLOWED_ORIGINS` = `https://staging.litigious.online`
 - `FORCE_HTTPS=true`, `METRICS_ENABLED=true`, `CLAMAV_ENABLED=true` (if scanner available)
 
 Frontend build vars:
@@ -38,5 +38,5 @@ Serve `frontend/build` via nginx or Railway static service; proxy `/api` to back
 
 ## 4. Monitoring
 
-- Prometheus scrape: `https://staging.legalestate.tech/metrics`
+- Prometheus scrape: `https://staging.litigious.online/metrics`
 - Optional: set `SENTRY_DSN` and install `@sentry/node` on backend

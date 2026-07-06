@@ -78,7 +78,7 @@ show_status() {
     if node -e "
         const { PrismaClient } = require('@prisma/client');
         const prisma = new PrismaClient();
-        prisma.user.count({where: {email: {contains: '@legalestate.tech'}}})
+        prisma.user.count({where: {email: {contains: '@litigious.online'}}})
         .then(count => {
             console.log('Demo users: ' + count);
             process.exit(0);
@@ -180,22 +180,22 @@ show_credentials() {
     echo "============================================"
     echo
     echo "🔐 Administrator Account:"
-    echo "   Email:    demo@legalestate.tech"
+    echo "   Email:    demo@litigious.online"
     echo "   Password: demo123"
     echo "   Role:     Admin (full access)"
     echo
     echo "👤 User Account:"
-    echo "   Email:    user@legalestate.tech"
+    echo "   Email:    user@litigious.online"
     echo "   Password: user123"
     echo "   Role:     Attorney"
     echo
     echo "📋 Paralegal Account:"
-    echo "   Email:    paralegal@legalestate.tech"
+    echo "   Email:    paralegal@litigious.online"
     echo "   Password: paralegal123"
     echo "   Role:     Paralegal"
     echo
-    echo "🌐 Demo URL: https://legalestate.tech"
-    echo "📧 Support:  support@legalestate.tech"
+    echo "🌐 Demo URL: https://litigious.online"
+    echo "📧 Support:  support@litigious.online"
     echo
 }
 

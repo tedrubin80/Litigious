@@ -632,7 +632,7 @@ echo "• Review firewall settings for your environment"
 echo "• Set up regular database backups"
 echo "• Monitor system logs regularly"
 echo ""
-echo "📧 Need help? Contact support@legalestate.tech"
+echo "📧 Need help? Contact support@litigious.online"
 echo ""
 
 exit 0

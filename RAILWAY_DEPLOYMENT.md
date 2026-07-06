@@ -70,9 +70,9 @@ MAX_FILE_SIZE=10MB
 DEMO_SESSION_TIMEOUT=3600
 
 # Demo Credentials
-DEMO_ADMIN_EMAIL=demo@legalestate.tech
+DEMO_ADMIN_EMAIL=demo@litigious.online
 DEMO_ADMIN_PASSWORD=demo123
-DEMO_USER_EMAIL=user@legalestate.tech
+DEMO_USER_EMAIL=user@litigious.online
 DEMO_USER_PASSWORD=user123
 
 # Activity Tracking
@@ -114,9 +114,9 @@ REACT_APP_DEMO_RESET_TIME=03:00 UTC
 REACT_APP_DEMO_BANNER=true
 
 # Demo Credentials Display
-REACT_APP_DEMO_ADMIN_EMAIL=demo@legalestate.tech
+REACT_APP_DEMO_ADMIN_EMAIL=demo@litigious.online
 REACT_APP_DEMO_ADMIN_PASSWORD=demo123
-REACT_APP_DEMO_USER_EMAIL=user@legalestate.tech
+REACT_APP_DEMO_USER_EMAIL=user@litigious.online
 REACT_APP_DEMO_USER_PASSWORD=user123
 
 # Demo Limitations Display
@@ -133,7 +133,7 @@ REACT_APP_WATERMARK_TEXT=DEMO VERSION
 REACT_APP_SHOW_DEMO_HINTS=true
 
 # Demo Contact
-REACT_APP_DEMO_SUPPORT_EMAIL=support@legalestate.tech
+REACT_APP_DEMO_SUPPORT_EMAIL=support@litigious.online
 REACT_APP_DEMO_CONTACT_MESSAGE=Questions? Contact us for a full version demo!
 ```
 

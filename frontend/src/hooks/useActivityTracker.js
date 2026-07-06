@@ -28,7 +28,7 @@ export const useActivityTracker = () => {
   // Initialize Socket.IO connection for real-time updates
   useEffect(() => {
     if (token && user) {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://legalestate.tech';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://litigious.online';
       const socketUrl = API_BASE_URL.replace('/api', '').replace('https://', 'wss://').replace('http://', 'ws://');
       
       socketRef.current = io(socketUrl, {

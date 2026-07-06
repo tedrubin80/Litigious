@@ -83,7 +83,7 @@ check_production_config() {
 
         cat > "$FRONTEND_DIR/.env.production" << EOF
 # Legal Estate Production Frontend Environment
-REACT_APP_API_URL=https://legalestate.tech/api
+REACT_APP_API_URL=https://litigious.online/api
 REACT_APP_PACKAGE_TYPE=production
 REACT_APP_VERSION=1.0.0
 
@@ -97,7 +97,7 @@ REACT_APP_DISABLE_REGISTRATION=true
 REACT_APP_SHOW_RESET_WARNING=false
 
 # Production Contact
-REACT_APP_SUPPORT_EMAIL=support@legalestate.tech
+REACT_APP_SUPPORT_EMAIL=support@litigious.online
 
 # Analytics (configure as needed)
 REACT_APP_GOOGLE_ANALYTICS=
@@ -244,7 +244,7 @@ reset_to_production_data() {
             await prisma.user.deleteMany({
                 where: {
                     email: {
-                        in: ['demo@legalestate.tech', 'user@legalestate.tech', 'paralegal@legalestate.tech']
+                        in: ['demo@litigious.online', 'user@litigious.online', 'paralegal@litigious.online']
                     }
                 }
             });
@@ -271,13 +271,13 @@ update_nginx_config() {
     print_step "Updating Nginx configuration for production..."
 
     # Check if production nginx config exists
-    if [ ! -f "/etc/nginx/sites-available/legalestate.tech" ]; then
+    if [ ! -f "/etc/nginx/sites-available/litigious.online" ]; then
         print_warning "Production Nginx configuration not found. Using current config."
         return 0
     fi
 
     # Ensure production site is enabled
-    ln -sf /etc/nginx/sites-available/legalestate.tech /etc/nginx/sites-enabled/ 2>/dev/null || true
+    ln -sf /etc/nginx/sites-available/litigious.online /etc/nginx/sites-enabled/ 2>/dev/null || true
 
     # Test and reload Nginx
     if nginx -t 2>/dev/null; then
@@ -318,7 +318,7 @@ else
 fi
 
 # Check SSL certificate (if applicable)
-if curl -f https://legalestate.tech > /dev/null 2>&1; then
+if curl -f https://litigious.online > /dev/null 2>&1; then
     echo "[$DATE] SSL: HEALTHY" >> $LOG_FILE
 else
     echo "[$DATE] SSL: CHECK REQUIRED" >> $LOG_FILE

@@ -256,14 +256,14 @@ Trusted by law firms nationwide
 Transform your legal practice with LegalEstate.tech - the future of legal practice management.
 
 **Contact Information:**
-- Website: https://legalestate.tech
-- API Documentation: https://api.legalestate.tech
-- Support: support@legalestate.tech
-- Sales: sales@legalestate.tech
+- Website: https://litigious.online
+- API Documentation: https://api.litigious.online
+- Support: support@litigious.online
+- Sales: sales@litigious.online
 
 **Demo Credentials:**
-- **Admin Access**: admin@legalestate.tech / AdminLegalTech2024
-- **Client Portal**: client@legalestate.tech / ClientLegalTech2024
+- **Admin Access**: admin@litigious.online / AdminLegalTech2024
+- **Client Portal**: client@litigious.online / ClientLegalTech2024
 
 ---
 

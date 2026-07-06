@@ -44,13 +44,13 @@
         function testAdminLogin() {
             document.getElementById('status').innerHTML = '<p>Testing admin login...</p>';
             
-            fetch('https://legalestate.tech/api/auth/admin/login', {
+            fetch('https://litigious.online/api/auth/admin/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: 'admin@legalestate.tech',
+                    email: 'admin@litigious.online',
                     password: 'AdminLegalTech2024'
                 })
             })
@@ -84,13 +84,13 @@
         function testClientLogin() {
             document.getElementById('status').innerHTML = '<p>Testing client login...</p>';
             
-            fetch('https://legalestate.tech/api/auth/client/login', {
+            fetch('https://litigious.online/api/auth/client/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    identifier: 'client@legalestate.tech',
+                    identifier: 'client@litigious.online',
                     password: 'ClientLegalTech2024'
                 })
             })

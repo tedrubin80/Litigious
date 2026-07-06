@@ -53,7 +53,7 @@ const Login = () => {
         <div className="max-w-sm w-full">
           <div className="mb-10">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'oklch(0.55 0.006 60)' }}>
-              LegalEstate
+              Litigious
             </p>
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'oklch(0.18 0.008 60)' }}>
               Two-factor authentication
@@ -131,7 +131,7 @@ const Login = () => {
       <div className="max-w-sm w-full">
         <div className="mb-10">
           <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'oklch(0.55 0.006 60)' }}>
-            LegalEstate
+            Litigious
           </p>
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'oklch(0.18 0.008 60)' }}>
             Sign in

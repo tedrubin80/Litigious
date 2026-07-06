@@ -178,9 +178,9 @@ MAX_FILE_SIZE=10MB
 DEMO_SESSION_TIMEOUT=3600
 
 # Demo Credentials
-DEMO_ADMIN_EMAIL=demo@legalestate.tech
+DEMO_ADMIN_EMAIL=demo@litigious.online
 DEMO_ADMIN_PASSWORD=demo123
-DEMO_USER_EMAIL=user@legalestate.tech
+DEMO_USER_EMAIL=user@litigious.online
 DEMO_USER_PASSWORD=user123
 
 # Activity Tracking
@@ -214,9 +214,9 @@ REACT_APP_DEMO_RESET_TIME=03:00 UTC
 REACT_APP_DEMO_BANNER=true
 
 # Demo Credentials
-REACT_APP_DEMO_ADMIN_EMAIL=demo@legalestate.tech
+REACT_APP_DEMO_ADMIN_EMAIL=demo@litigious.online
 REACT_APP_DEMO_ADMIN_PASSWORD=demo123
-REACT_APP_DEMO_USER_EMAIL=user@legalestate.tech
+REACT_APP_DEMO_USER_EMAIL=user@litigious.online
 REACT_APP_DEMO_USER_PASSWORD=user123
 
 # Limits
@@ -231,7 +231,7 @@ REACT_APP_DISABLE_REGISTRATION=false
 REACT_APP_SHOW_RESET_WARNING=true
 REACT_APP_WATERMARK_TEXT=DEMO VERSION
 REACT_APP_SHOW_DEMO_HINTS=true
-REACT_APP_DEMO_SUPPORT_EMAIL=support@legalestate.tech
+REACT_APP_DEMO_SUPPORT_EMAIL=support@litigious.online
 REACT_APP_DEMO_CONTACT_MESSAGE=Questions? Contact us for a full version demo!
 ```
 
@@ -262,7 +262,7 @@ Once both services are deployed:
    - Should show login page with demo credentials
 
 3. **Test Login**:
-   - Use: `demo@legalestate.tech` / `demo123`
+   - Use: `demo@litigious.online` / `demo123`
    - Should successfully log in
 
 ### Step 7: View Logs
@@ -386,8 +386,8 @@ Railway automatically backs up PostgreSQL, but you can also:
 - Database: (Internal, managed by Railway)
 
 ### Demo Credentials
-- Admin: `demo@legalestate.tech` / `demo123`
-- User: `user@legalestate.tech` / `user123`
+- Admin: `demo@litigious.online` / `demo123`
+- User: `user@litigious.online` / `user123`
 
 ### Health Endpoints
 - Backend Health: `/api/health`

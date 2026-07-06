@@ -20,15 +20,15 @@ A comprehensive legal practice management system with AI integration, built with
 
 ### Working Demo Accounts
 ```
-👑 Administrator: demo@legalestate.tech / demo123
-⚖️  Attorney:      user@legalestate.tech / user123
+👑 Administrator: demo@litigious.online / demo123
+⚖️  Attorney:      user@litigious.online / user123
 👤 Client:        client@demo.tech / client123
 ```
 
 ### Access Points
-- **Main Demo**: https://legalestate.tech/
-- **Admin Portal**: https://legalestate.tech/admin/login
-- **Client Portal**: https://legalestate.tech/client/login
+- **Main Demo**: https://litigious.online/
+- **Admin Portal**: https://litigious.online/admin/login
+- **Client Portal**: https://litigious.online/client/login
 
 ## 🏗️ Architecture
 
@@ -172,7 +172,7 @@ ANTHROPIC_API_KEY=demo
 ```
 
 ### Nginx Configuration
-- **Location**: `/etc/nginx/sites-enabled/legalestate.tech`
+- **Location**: `/etc/nginx/sites-enabled/litigious.online`
 - **Features**: SSL, caching, API proxy
 - **Cache Busting**: Disabled for demo deployment
 
@@ -275,7 +275,7 @@ npm run db:reset   # Reset database
 ## 📞 Support
 
 ### Demo Access
-- **Email**: support@legalestate.tech
+- **Email**: support@litigious.online
 - **Demo Reset**: Daily at 3:00 AM UTC
 - **Session Limit**: 1 hour for demo accounts
 

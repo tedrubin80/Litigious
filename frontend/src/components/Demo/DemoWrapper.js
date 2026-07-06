@@ -143,7 +143,7 @@ const DemoFloatingControls = ({ onStartTour, tourCompleted }) => {
               {tourCompleted ? 'Replay Tour' : 'Start Tour'}
             </button>
             <a
-              href="mailto:support@legalestate.tech?subject=Demo%20Request"
+              href="mailto:support@litigious.online?subject=Demo%20Request"
               className="w-full flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

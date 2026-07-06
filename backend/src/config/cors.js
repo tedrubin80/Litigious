@@ -16,8 +16,8 @@ const buildAllowedOrigins = () => {
     'http://localhost:3001',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
-    'https://legalestate.tech',
-    'https://www.legalestate.tech',
+    'https://litigious.online',
+    'https://www.litigious.online',
     process.env.HTTP_FALLBACK_URL
   ].filter(Boolean))];
 };

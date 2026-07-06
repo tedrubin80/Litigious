@@ -61,7 +61,7 @@ const UserManagement = () => {
           id: 'ce7cadbe0f01fcdc79a0138a826d5969',
           firstName: 'Admin',
           lastName: 'User',
-          email: 'admin@legalestate.tech',
+          email: 'admin@litigious.online',
           role: 'SUPER_ADMIN',
           isActive: true,
           lastLogin: new Date().toISOString(),

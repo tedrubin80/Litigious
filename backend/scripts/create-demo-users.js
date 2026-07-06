@@ -8,13 +8,13 @@ async function createDemoUsers() {
 
   const demoUsers = [
     {
-      email: 'demo@legalestate.tech',
+      email: 'demo@litigious.online',
       name: 'Demo Administrator',
       password: 'demo123',
       role: 'SUPER_ADMIN'
     },
     {
-      email: 'user@legalestate.tech',
+      email: 'user@litigious.online',
       name: 'Demo User',
       password: 'user123',
       role: 'ATTORNEY'
@@ -53,10 +53,10 @@ async function createDemoUsers() {
     console.log('Demo Users Created:');
     console.log('=================================');
     console.log('\n🎭 Demo Admin Account:');
-    console.log('   Email: demo@legalestate.tech');
+    console.log('   Email: demo@litigious.online');
     console.log('   Password: demo123');
     console.log('\n👤 Demo User Account:');
-    console.log('   Email: user@legalestate.tech');
+    console.log('   Email: user@litigious.online');
     console.log('   Password: user123');
     console.log('\n👥 Demo Client Account:');
     console.log('   Email: client@demo.tech');

@@ -21,7 +21,7 @@ echo
 echo -e "${YELLOW}Testing Demo Mode Login...${NC}"
 demo_response=$(curl -s -X POST "$API_URL/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"email":"demo@legalestate.tech","password":"demo123"}' 2>/dev/null)
+  -d '{"email":"demo@litigious.online","password":"demo123"}' 2>/dev/null)
 
 if echo "$demo_response" | grep -q '"success":true'; then
   echo -e "${GREEN}✅ Demo login successful${NC}"
@@ -37,8 +37,8 @@ echo
 # Test production users login
 echo -e "${YELLOW}Testing Production Users Login...${NC}"
 production_accounts=(
-  "admin@legalestate.tech:admin123:SUPER_ADMIN"
-  "attorney@legalestate.tech:attorney123:ADMIN"
+  "admin@litigious.online:admin123:SUPER_ADMIN"
+  "attorney@litigious.online:attorney123:ADMIN"
 )
 
 for account in "${production_accounts[@]}"; do
