@@ -1,20 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "marketing": {
-      "root": "website",
-      "installCommand": "echo \"static marketing site\"",
-      "buildCommand": "echo \"static marketing site\"",
-      "outputDirectory": "."
-    },
-    "app": {
-      "root": "frontend",
-      "framework": "vite",
-      "installCommand": "npm install",
-      "buildCommand": "npm run build",
-      "outputDirectory": "build"
-    }
-  },
+  "installCommand": "npm install --prefix frontend",
+  "buildCommand": "npm run build --prefix frontend",
+  "outputDirectory": "frontend/build",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -27,32 +19,6 @@
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "app.litigious.online" }],
-      "destination": { "service": "app" }
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "litigious.online" }],
-      "destination": { "service": "app" }
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.litigious.online" }],
-      "destination": { "service": "app" }
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "litigiousweb.vercel.app" }],
-      "destination": { "service": "marketing" }
-    },
-    {
-      "source": "/:path*",
-      "destination": { "service": "app" }
     }
   ]
 }

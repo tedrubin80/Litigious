@@ -275,11 +275,11 @@ Litigious is a **monorepo**: PostgreSQL + `backend/` + `frontend/`.
 
 Config-as-code included:
 
-- [`vercel.json`](vercel.json) — **root** multi-service config (marketing + app); required for one Vercel project
+- [`vercel.json`](vercel.json) — deploy **app** from repo root (Option B in deploy guide)
 - `backend/railway.toml` — API build, healthcheck, Prisma migrate on deploy
 - `frontend/railway.toml` — Vite build + static serve
-- `frontend/vercel.json` — standalone frontend project (optional)
-- `website/vercel.json` — standalone marketing project (optional)
+- `frontend/vercel.json` — deploy app with Root Directory `frontend` (Option A)
+- `website/vercel.json` — separate Vercel project for marketing
 - `docker-compose.yml` — Postgres + API + web
 
 To publish a **Railway template** for one-click deploys: deploy once, then **Generate Template from Project** — see [deploy/railway/TEMPLATE.md](deploy/railway/TEMPLATE.md).

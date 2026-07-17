@@ -1,35 +1,48 @@
 # Deploy on Vercel
 
-Litigious is a **monorepo** with two Vercel-friendly surfaces:
+Litigious splits across hosts:
 
-| Service | Folder | Role |
-|---------|--------|------|
-| `marketing` | `website/` | Static product site |
-| `app` | `frontend/` | Vite SPA (staff + client portal) |
+| Part | Folder | Host |
+|------|--------|------|
+| **App (demo SPA)** | `frontend/` | Vercel |
+| **Marketing site** | `website/` | Vercel (separate project) |
+| **API + Postgres** | `backend/` | Railway / VPS / Docker |
 
-The **API + PostgreSQL** stack should run on **Railway**, a VPS, or Docker — not Vercel (Prisma, uploads, Socket.IO, demo auto-reset).
+## Test the app on Vercel (recommended)
 
-## One Vercel project (recommended) — `vercel.json` Services
+Use **one** Vercel project for the React app.
 
-Vercel **requires a root [`vercel.json`](../vercel.json)** when deploying multiple services from one repo.
+### Option A — Root Directory `frontend` (simplest)
 
-> **Requires Vercel Services** on your team/project. In the project dashboard, confirm the framework/mode supports `services` in `vercel.json`. If you see `404 NOT_FOUND` or `DEPLOYMENT_NOT_FOUND` with an ID like `iad1::gs542-...`, see [Troubleshooting](#troubleshooting) below.
+1. Vercel → import `tedrubin80/Litigious`
+2. **Root Directory**: `frontend`
+3. Framework: **Vite** (auto-detected)
+4. Build: `npm run build` · Output: `build`
+5. Uses [`frontend/vercel.json`](../frontend/vercel.json)
 
-1. Vercel → **Add New Project** → import this repo
-2. **Root Directory**: leave as **`.`** (repository root) — not `frontend/` or `website/`
-3. Vercel reads [`vercel.json`](../vercel.json) at the repo root and builds both services
-4. Set environment variables (Project → Settings → Environment Variables):
+### Option B — Root Directory `.` (repo root)
 
-**App service (`frontend/`)**
+1. **Root Directory**: `.` (repository root)
+2. Uses root [`vercel.json`](../vercel.json) — builds `frontend/` and outputs `frontend/build`
+
+Both options produce a normal **static** deploy (no Vercel Services block).
+
+### Environment variables
+
+Set in Vercel → Project → Settings → Environment Variables (Production + Preview):
 
 ```bash
-VITE_API_URL=/api
+VITE_API_URL=https://YOUR-API-HOST/api
 VITE_DEMO_MODE=true
 VITE_APP_NAME=Litigious
-VITE_MARKETING_URL=https://your-marketing-domain.example.com
+VITE_MARKETING_URL=https://your-marketing-project.vercel.app
 ```
 
-**Backend proxy** — add a top-level rewrite in root `vercel.json` when your API is ready:
+Redeploy after changing env vars (Vite bakes them at build time).
+
+### API note
+
+The SPA needs a running backend. Point `VITE_API_URL` at Railway or your VPS API (e.g. `https://litigious.online/api` if that API is public). Optional: add a rewrite in `vercel.json`:
 
 ```json
 {
@@ -38,81 +51,53 @@ VITE_MARKETING_URL=https://your-marketing-domain.example.com
 }
 ```
 
-Set `VITE_API_URL=/api` on the app service when using this proxy.
+Then set `VITE_API_URL=/api`.
 
-### Default routing (host-based)
+---
 
-| Host | Service |
-|------|---------|
-| `litigious.online`, `app.*` | `app` (React SPA) |
-| Everything else (e.g. `litigiousweb.vercel.app`) | `marketing` (static site) |
+## Marketing site (second Vercel project)
 
-Adjust the `has.host` rules in root `vercel.json` for your domains.
+1. **Add New Project** → same repo
+2. **Root Directory**: `website`
+3. Framework: **Other** (static) — no build command
+4. Uses [`website/vercel.json`](../website/vercel.json)
 
-### Local dev with all services
-
-```bash
-vercel dev
-# or offline:
-vercel dev -L
-```
-
-## Alternative: two separate Vercel projects
-
-If you prefer one project per folder (older pattern), create **two** Vercel projects:
-
-| Project | Root Directory | Config |
-|---------|----------------|--------|
-| Marketing | `website` | [`website/vercel.json`](../website/vercel.json) |
-| App | `frontend` | [`frontend/vercel.json`](../frontend/vercel.json) |
-
-Set `VITE_API_URL` to your full API URL (e.g. `https://api.example.com/api`) when not using the root `/api` proxy.
-
-## Recommended DNS layout
+Example domains:
 
 ```
-marketing.example.com   →  Vercel (marketing service or website project)
-app.example.com         →  Vercel (app service or frontend project)
-api.example.com         →  Railway / VPS (backend/)
+litigious-app.vercel.app      → frontend project
+litigious-marketing.vercel.app → website project
+litigious.online              → your VPS (demo), or point DNS elsewhere
 ```
 
-Example mapping for Litigious:
+---
 
+## Why not Vercel `services` in root `vercel.json`?
+
+We tried a root `services` block (marketing + app in one project). On many teams it builds but logs:
+
+```text
+WARNING! Build output contains no "functions" or "static" directory
 ```
-litigiousweb.vercel.app → marketing
-litigious.online        → app
-api.litigious.online    → Railway backend
-```
 
-## Backend on Railway
+Then the deployment URL returns `404 NOT_FOUND` / `DEPLOYMENT_NOT_FOUND` (`iad1::...`, `arn1::...`).
 
-See [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md). After the API is live, point the root `vercel.json` `/api` rewrite at that host so the SPA can use `VITE_API_URL=/api`.
+**Vercel Services** needs explicit platform support and correct per-service output packaging. Until that is enabled and verified, use **two projects** (or one project for `frontend/` only).
 
-## Going to production
-
-Disable demo UI and auto-reset — see [GOING_TO_PRODUCTION.md](GOING_TO_PRODUCTION.md).
+---
 
 ## Troubleshooting
 
-### `404 NOT_FOUND` / `DEPLOYMENT_NOT_FOUND` — ID like `iad1::gs542-...`
-
-Vercel generated that ID at the edge (region `iad1`). Common causes:
-
-| Cause | Fix |
-|-------|-----|
-| **Root Directory** still set to `frontend/` or `website/` | Set to **`.`** (repo root) so root `vercel.json` is used |
-| **Services not enabled** on your Vercel team | Use [two separate projects](#alternative-two-separate-vercel-projects) instead, or enable Services |
-| **Invalid `/api` rewrite** to a bad host | Remove the rewrite until Railway API is live, or fix the URL |
-| **Custom domain** points at an old/deleted deployment | Project → Domains → reassign production domain to latest deployment |
-| **Preview URL** (`*.vercel.app`) shows 404 | Default rewrite now routes unmatched hosts to `app`; redeploy after pull |
-
-Check **Deployments** in the Vercel dashboard for the commit — GitHub may show ✅ even if a specific domain alias is stale.
-
-### GitHub Actions CI fails (separate from Vercel)
-
-CI may fail on backend tests if Postgres is not available in the runner. That does not block Vercel frontend deploys unless you enabled “Require status checks.”
+| Symptom | Fix |
+|---------|-----|
+| `no "functions" or "static" directory` in build log | Remove `services` from `vercel.json`; use Option A or B above |
+| `DEPLOYMENT_NOT_FOUND` / `iad1::...` | Deployment has no static output — redeploy after config fix; check Domains → latest deployment |
+| Blank app / API errors | Set `VITE_API_URL` to a live backend URL |
+| `litigious.online` unchanged | That domain is on your VPS/nginx, not this Vercel project |
+| GitHub Actions ❌ | CI Postgres tests fail separately; does not block Vercel unless you require that check |
 
 ## Related
 
 - [INSTALL.md](INSTALL.md)
 - [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md)
+- [GOING_TO_PRODUCTION.md](GOING_TO_PRODUCTION.md)
