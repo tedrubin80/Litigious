@@ -2,7 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
     "marketing": {
-      "root": "website"
+      "root": "website",
+      "installCommand": "echo \"static marketing site\"",
+      "buildCommand": "echo \"static marketing site\"",
+      "outputDirectory": "."
     },
     "app": {
       "root": "frontend",
@@ -28,10 +31,6 @@
   ],
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://REPLACE_WITH_YOUR_API_HOST/api/:path*"
-    },
-    {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "app.litigious.online" }],
       "destination": { "service": "app" }
@@ -48,7 +47,12 @@
     },
     {
       "source": "/:path*",
+      "has": [{ "type": "host", "value": "litigiousweb.vercel.app" }],
       "destination": { "service": "marketing" }
+    },
+    {
+      "source": "/:path*",
+      "destination": { "service": "app" }
     }
   ]
 }

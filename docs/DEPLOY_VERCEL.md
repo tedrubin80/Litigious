@@ -13,8 +13,10 @@ The **API + PostgreSQL** stack should run on **Railway**, a VPS, or Docker — n
 
 Vercel **requires a root [`vercel.json`](../vercel.json)** when deploying multiple services from one repo.
 
+> **Requires Vercel Services** on your team/project. In the project dashboard, confirm the framework/mode supports `services` in `vercel.json`. If you see `404 NOT_FOUND` or `DEPLOYMENT_NOT_FOUND` with an ID like `iad1::gs542-...`, see [Troubleshooting](#troubleshooting) below.
+
 1. Vercel → **Add New Project** → import this repo
-2. **Root Directory**: leave as **`.`** (repository root)
+2. **Root Directory**: leave as **`.`** (repository root) — not `frontend/` or `website/`
 3. Vercel reads [`vercel.json`](../vercel.json) at the repo root and builds both services
 4. Set environment variables (Project → Settings → Environment Variables):
 
@@ -27,7 +29,16 @@ VITE_APP_NAME=Litigious
 VITE_MARKETING_URL=https://your-marketing-domain.example.com
 ```
 
-**Backend proxy** — edit the `/api` rewrite in root `vercel.json` and replace `REPLACE_WITH_YOUR_API_HOST` with your Railway (or other) API host, e.g. `litigious-api.up.railway.app` (no `https://` in the placeholder line — the file includes it).
+**Backend proxy** — add a top-level rewrite in root `vercel.json` when your API is ready:
+
+```json
+{
+  "source": "/api/:path*",
+  "destination": "https://YOUR-RAILWAY-HOST.up.railway.app/api/:path*"
+}
+```
+
+Set `VITE_API_URL=/api` on the app service when using this proxy.
 
 ### Default routing (host-based)
 
@@ -80,6 +91,26 @@ See [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md). After the API is live, point the roo
 ## Going to production
 
 Disable demo UI and auto-reset — see [GOING_TO_PRODUCTION.md](GOING_TO_PRODUCTION.md).
+
+## Troubleshooting
+
+### `404 NOT_FOUND` / `DEPLOYMENT_NOT_FOUND` — ID like `iad1::gs542-...`
+
+Vercel generated that ID at the edge (region `iad1`). Common causes:
+
+| Cause | Fix |
+|-------|-----|
+| **Root Directory** still set to `frontend/` or `website/` | Set to **`.`** (repo root) so root `vercel.json` is used |
+| **Services not enabled** on your Vercel team | Use [two separate projects](#alternative-two-separate-vercel-projects) instead, or enable Services |
+| **Invalid `/api` rewrite** to a bad host | Remove the rewrite until Railway API is live, or fix the URL |
+| **Custom domain** points at an old/deleted deployment | Project → Domains → reassign production domain to latest deployment |
+| **Preview URL** (`*.vercel.app`) shows 404 | Default rewrite now routes unmatched hosts to `app`; redeploy after pull |
+
+Check **Deployments** in the Vercel dashboard for the commit — GitHub may show ✅ even if a specific domain alias is stale.
+
+### GitHub Actions CI fails (separate from Vercel)
+
+CI may fail on backend tests if Postgres is not available in the runner. That does not block Vercel frontend deploys unless you enabled “Require status checks.”
 
 ## Related
 
