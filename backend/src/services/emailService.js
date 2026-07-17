@@ -6,8 +6,13 @@ class EmailService {
   constructor() {
     this.appName = getAppName();
     this.productLabel = getProductLabel();
-    this.resend = new Resend(process.env.RESEND_API_KEY || '');
-    console.log('📧 Resend email service initialized');
+    const apiKey = process.env.RESEND_API_KEY?.trim();
+    this.resend = apiKey ? new Resend(apiKey) : null;
+    if (this.resend) {
+      console.log('📧 Resend email service initialized');
+    } else {
+      console.warn('📧 Email disabled: set RESEND_API_KEY to enable transactional email');
+    }
   }
 
 
@@ -16,6 +21,14 @@ class EmailService {
   }
 
   async sendEmail({ to, subject, html, text }) {
+    if (!this.resend) {
+      console.warn('📧 Email not sent (RESEND_API_KEY not configured):', subject);
+      return {
+        success: false,
+        error: 'Email service not configured'
+      };
+    }
+
     try {
       const { data, error } = await this.resend.emails.send({
         from: getFromEmail(),
