@@ -90,7 +90,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ### 5. Add Remote Repository
 
 ```bash
-git remote add origin https://github.com/tedrubin80/LegalEstateDemo.git
+git remote add origin https://github.com/tedrubin80/Litigious.git
 ```
 
 ### 6. Rename Branch to 'main'
@@ -126,7 +126,7 @@ git push -u origin main
 2. Click "New Project"
 3. Select "Deploy from GitHub repo"
 4. Authorize Railway to access your GitHub
-5. Select `tedrubin80/LegalEstateDemo`
+5. Select `tedrubin80/Litigious`
 
 ### Step 2: Add PostgreSQL Database
 

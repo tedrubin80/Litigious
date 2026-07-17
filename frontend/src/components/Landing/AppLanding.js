@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const MARKETING_URL = import.meta.env.VITE_MARKETING_URL || 'https://litigiousweb.vercel.app';
-const DOCS_URL = import.meta.env.VITE_DOCS_URL || 'https://github.com/tedrubin80/Litigious#installation';
+const DOCS_URL = import.meta.env.VITE_DOCS_URL || 'https://github.com/tedrubin80/Litigious/blob/main/docs/INSTALL.md';
 
 const AppLanding = () => (
   <div

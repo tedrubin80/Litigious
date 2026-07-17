@@ -2,7 +2,7 @@
 
 # 🚀 Legal Estate Management Software - Project Launcher
 # One script to rule them all - handles setup, updates, validation, and deployment
-# Repository: https://github.com/tedrubin80/legal-estate
+# Repository: https://github.com/tedrubin80/Litigious
 
 set -e
 
@@ -380,7 +380,7 @@ show_project_info() {
     
     echo -e "${CYAN}Legal Estate Management Software${NC}"
     echo -e "A comprehensive case management system for law firms\n"
-    echo -e "${BLUE}Repository:${NC} https://github.com/tedrubin80/legal-estate\n"
+    echo -e "${BLUE}Repository:${NC} https://github.com/tedrubin80/Litigious\n"
     
     echo -e "${BLUE}Features:${NC}"
     echo -e "  • Client management (individuals & businesses)"

@@ -18,7 +18,7 @@ This guide will walk you through deploying the Legal Estate Demo application to 
 1. Go to [Railway](https://railway.app)
 2. Click "New Project"
 3. Select "Deploy from GitHub repo"
-4. Choose `tedrubin80/LegalEstateDemo`
+4. Choose `tedrubin80/Litigious`
 
 ### 2. Add PostgreSQL Database
 
