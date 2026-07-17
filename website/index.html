@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Litigious — open source legal practice management. Cases, billing, documents, client portal, and LMS migration." />
+  <meta property="og:title" content="Litigious — Legal Practice Management" />
+  <meta property="og:description" content="Self-hostable LMS for law firms. MIT licensed. Migrate from Clio, MyCase, PracticePanther." />
+  <title>Litigious — Legal Practice Management</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <span class="wordmark">Litigious</span>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#docs">Docs</a>
+      <a href="#deploy">Deploy</a>
+      <a href="https://github.com/tedrubin80/Litigious" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn btn-primary" href="https://litigious.online" target="_blank" rel="noopener">Live demo</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <p class="eyebrow">Open source · MIT license</p>
+    <h1>Run your firm.<br />Own your stack.</h1>
+    <p class="lead">
+      Litigious is a modular LMS for law firms and legal tech builders — case management,
+      time tracking, documents, client portal, AI-assisted workflows, and migration from Clio,
+      MyCase, and PracticePanther.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://github.com/tedrubin80/Litigious" target="_blank" rel="noopener">View on GitHub</a>
+      <a class="btn btn-secondary" href="https://litigious.online" target="_blank" rel="noopener">Try the demo</a>
+    </div>
+  </header>
+
+  <section id="features" class="section">
+    <h2>What you get</h2>
+    <div class="grid">
+      <article class="card">
+        <h3>Case &amp; client management</h3>
+        <p>Full lifecycle from intake through close, roles, deadlines, and client portal access.</p>
+      </article>
+      <article class="card">
+        <h3>Billing &amp; time</h3>
+        <p>Billable hours, invoicing, and integrations with major payment providers.</p>
+      </article>
+      <article class="card">
+        <h3>Documents &amp; AI</h3>
+        <p>Secure uploads, previews, and optional multi-provider AI document generation.</p>
+      </article>
+      <article class="card">
+        <h3>LMS migration</h3>
+        <p>Import adapters for Clio, MyCase, PracticePanther, and CSV exports with dry-run preview.</p>
+      </article>
+      <article class="card">
+        <h3>Self-host or cloud</h3>
+        <p>Docker locally, Railway for full stack, Vercel for frontend — documented and templated.</p>
+      </article>
+      <article class="card">
+        <h3>White-label ready</h3>
+        <p>Deploy under your brand, domain, and module selection for resellers and consultants.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="docs" class="section section-muted">
+    <h2>Documentation</h2>
+    <p class="section-lead">Whether you deploy Litigious or use it day-to-day, start with the right guide.</p>
+    <div class="doc-grid">
+      <a class="doc-card" href="https://github.com/tedrubin80/Litigious/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener">
+        <h3>User guide</h3>
+        <p>Staff &amp; admins — cases, portal, time, LMS import</p>
+      </a>
+      <a class="doc-card" href="https://github.com/tedrubin80/Litigious/blob/main/docs/INSTALL.md" target="_blank" rel="noopener">
+        <h3>Installation</h3>
+        <p>Clone, env vars, database, local dev</p>
+      </a>
+      <a class="doc-card" href="https://github.com/tedrubin80/Litigious/blob/main/docs/DEPLOY_RAILWAY.md" target="_blank" rel="noopener">
+        <h3>Deploy on Railway</h3>
+        <p>Postgres + API + app in minutes</p>
+      </a>
+      <a class="doc-card" href="https://github.com/tedrubin80/Litigious/blob/main/docs/IMPORT_MIGRATION.md" target="_blank" rel="noopener">
+        <h3>LMS migration</h3>
+        <p>Import from Clio, MyCase, PracticePanther</p>
+      </a>
+    </div>
+  </section>
+
+  <section id="deploy" class="section">
+    <h2>Deploy in minutes</h2>
+    <p class="section-lead">Config-as-code is included. Fork, set env vars, deploy.</p>
+    <ol class="steps">
+      <li>Fork <a href="https://github.com/tedrubin80/Litigious">tedrubin80/Litigious</a></li>
+      <li><code>npm run setup</code> — install deps and copy env templates</li>
+      <li>Railway: Postgres + <code>backend/</code> + <code>frontend/</code> (see deploy guides)</li>
+      <li>Optional: <code>npm run seed:demo</code> for showcase data</li>
+    </ol>
+    <p class="deploy-links">
+      <a href="https://github.com/tedrubin80/Litigious/blob/main/docs/INSTALL.md">Installation</a>
+      &middot;
+      <a href="https://github.com/tedrubin80/Litigious/blob/main/docs/DEPLOY_RAILWAY.md">Railway</a>
+      &middot;
+      <a href="https://github.com/tedrubin80/Litigious/blob/main/docs/DEPLOY_VERCEL.md">Vercel</a>
+    </p>
+  </section>
+
+  <section class="section section-muted">
+    <h2>Quick start (developers)</h2>
+    <pre class="code-block"><code>git clone https://github.com/tedrubin80/Litigious.git
+cd Litigious
+npm run setup
+# edit backend/.env
+npm run db:push && npm run dev</code></pre>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; <span id="year"></span> Litigious &middot; <a href="https://github.com/tedrubin80/Litigious/blob/main/LICENSE">MIT License</a></p>
+    <div class="footer-links">
+      <a href="https://github.com/tedrubin80/Litigious">GitHub</a>
+      <a href="https://github.com/tedrubin80/Litigious/blob/main/docs/USER_GUIDE.md">User guide</a>
+      <a href="mailto:ted@theorubin.com">Contact</a>
+    </div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

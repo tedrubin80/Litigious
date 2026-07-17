@@ -22,13 +22,15 @@ const Layout = () => {
       '/app/reports': 'Reports',
       '/app/research': 'Legal Research',
       '/app/admin/users': 'User Management',
+      '/app/admin/import': 'LMS Migration Import',
+      '/app/admin/ai-keys': 'AI Provider Keys',
       '/app/settings': 'Settings'
     };
 
     if (path.startsWith('/app/cases/') && path !== '/app/cases') return 'Case Details';
     if (path.startsWith('/app/clients/') && path !== '/app/clients') return 'Client Details';
 
-    return titles[path] || 'LegalEstate';
+    return titles[path] || 'Litigious';
   };
 
   return (

@@ -14,6 +14,7 @@ import {
   ChartBarIcon,
   CogIcon,
   UsersIcon,
+  ArrowPathIcon,
   VideoCameraIcon,
   MagnifyingGlassIcon
 } from '../Icons';
@@ -57,6 +58,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const adminNavigation = [
     { name: 'User Management', href: '/app/admin/users', icon: UsersIcon },
+    { name: 'LMS Import', href: '/app/admin/import', icon: ArrowPathIcon },
     { name: 'AI Provider Keys', href: '/app/admin/ai-keys', icon: CogIcon },
   ];
 

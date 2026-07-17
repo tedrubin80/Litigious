@@ -261,6 +261,7 @@ model User {
   caseTemplates    CaseTemplate[] @relation("CaseTemplateCreator")
   notifications    Notification[]
   completedWorkflowSteps CaseWorkflowStep[] @relation("WorkflowStepCompletedBy")
+  importJobs       ImportJob[]    @relation("ImportJobCreator")
   
   @@index([email])
   @@index([role])
@@ -1300,4 +1301,49 @@ model AiProviderConfig {
   
   @@index([provider])
   @@map("ai_provider_configs")
+}
+
+model ImportJob {
+  id                String    @id @default(cuid())
+  sourceId          String    @db.VarChar(50)
+  importMode        String    @default("api") @db.VarChar(20) // api | csv
+  status            String    @default("pending") @db.VarChar(30)
+  entitiesRequested Json      @db.JsonB
+  progress          Json      @db.JsonB
+  errors            Json      @default("[]") @db.JsonB
+  dryRun            Boolean   @default(true)
+  preview           Json?     @db.JsonB
+  authConfig        Json?     @db.JsonB
+  csvMeta           Json?     @db.JsonB
+  startedAt         DateTime? @db.Timestamptz(6)
+  completedAt       DateTime? @db.Timestamptz(6)
+  createdById       String
+  createdAt         DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @db.Timestamptz(6)
+
+  createdBy         User      @relation("ImportJobCreator", fields: [createdById], references: [id])
+  mappings          ImportExternalMapping[]
+
+  @@index([sourceId])
+  @@index([status])
+  @@index([createdById])
+  @@index([createdAt])
+  @@map("import_jobs")
+}
+
+model ImportExternalMapping {
+  id             String    @id @default(cuid())
+  importJobId    String
+  entityType     String    @db.VarChar(30)
+  externalId     String    @db.VarChar(255)
+  externalSource String    @db.VarChar(50)
+  internalId     String    @db.VarChar(255)
+  createdAt      DateTime  @default(now()) @db.Timestamptz(6)
+
+  importJob      ImportJob @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+
+  @@unique([importJobId, entityType, externalId, externalSource])
+  @@index([externalId, externalSource])
+  @@index([entityType])
+  @@map("import_external_mappings")
 }

@@ -1,6 +1,7 @@
 {
-  "name": "legal-estate-frontend",
+  "name": "litigious-frontend",
   "version": "1.0.0",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^2.2.7",

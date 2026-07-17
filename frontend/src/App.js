@@ -6,7 +6,7 @@ import ErrorMonitor from './components/Common/ErrorMonitor';
 import ToastProvider from './components/Common/Toast';
 import { RealTimeProvider } from './services/realtimeService';
 import Layout from './components/Layout/Layout';
-import Homepage from './components/Homepage/Homepage';
+import AppLanding from './components/Landing/AppLanding';
 import Login from './components/Auth/Login';
 import AdminLogin from './components/Auth/AdminLogin';
 import ClientLogin from './components/Auth/ClientLogin';
@@ -24,6 +24,7 @@ import TimeTracker from './components/TimeTracking/TimeTracker';
 import MedicalRecords from './components/Medical/MedicalRecords';
 import UserManagement from './components/Admin/UserManagement';
 import AIKeyManagement from './components/Admin/AIKeyManagement';
+import ImportMigration from './components/Admin/ImportMigration';
 import Reports from './components/Reports/Reports';
 import Settings from './components/Settings/Settings';
 import WebRTCMeetingList from './components/WebRTC/WebRTCMeetingList';
@@ -78,7 +79,7 @@ function App() {
             <Router>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Homepage />} />
+              <Route path="/" element={<AppLanding />} />
               <Route path="/login" element={
                 <PublicRoute>
                   <Login />
@@ -143,6 +144,7 @@ function App() {
                 {/* Admin */}
                 <Route path="admin/users" element={<UserManagement />} />
                 <Route path="admin/ai-keys" element={<AIKeyManagement />} />
+                <Route path="admin/import" element={<ImportMigration />} />
                 
                 {/* Settings */}
                 <Route path="settings" element={<Settings />} />

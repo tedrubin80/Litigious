@@ -16,7 +16,7 @@ class EmailService {
   async sendEmail({ to, subject, html, text }) {
     try {
       const { data, error } = await this.resend.emails.send({
-        from: process.env.FROM_EMAIL || 'Legal Estate <noreply@litigious.online>',
+        from: process.env.FROM_EMAIL || 'Litigious <noreply@litigious.online>',
         to: Array.isArray(to) ? to : [to],
         subject,
         html
@@ -47,14 +47,14 @@ class EmailService {
   }
 
   async sendWelcomeEmail(user, tempPassword = null) {
-    const subject = 'Welcome to Legal Estate Management System';
+    const subject = 'Welcome to Litigious Management System';
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>Welcome to Legal Estate</title>
+          <title>Welcome to Litigious</title>
           <style>
               body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
               .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
@@ -66,12 +66,12 @@ class EmailService {
       </head>
       <body>
           <div class="header">
-              <h1>Welcome to Legal Estate</h1>
+              <h1>Welcome to Litigious</h1>
               <p>Your Legal Practice Management System</p>
           </div>
           <div class="content">
               <h2>Hello ${user.name}!</h2>
-              <p>Welcome to Legal Estate Management System. Your account has been successfully created.</p>
+              <p>Welcome to Litigious Management System. Your account has been successfully created.</p>
               
               <div class="credentials">
                   <h3>Your Account Details:</h3>
@@ -102,14 +102,14 @@ class EmailService {
               <p>If you need assistance, please contact our support team.</p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Legal Estate Management System. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} Litigious Management System. All rights reserved.</p>
           </div>
       </body>
       </html>
     `;
 
     const text = `
-      Welcome to Legal Estate Management System!
+      Welcome to Litigious Management System!
       
       Hello ${user.name},
       
@@ -123,7 +123,7 @@ class EmailService {
       ${tempPassword ? 'Important: Please change your password immediately after logging in.' : ''}
       
       Best regards,
-      Legal Estate Team
+      Litigious Team
     `;
 
     return await this.sendEmail({
@@ -137,7 +137,7 @@ class EmailService {
   async sendPasswordResetEmail(user, resetToken) {
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
     
-    const subject = 'Password Reset - Legal Estate';
+    const subject = 'Password Reset - Litigious';
     const html = `
       <!DOCTYPE html>
       <html>
@@ -157,11 +157,11 @@ class EmailService {
       <body>
           <div class="header">
               <h1>Password Reset Request</h1>
-              <p>Legal Estate Management System</p>
+              <p>Litigious Management System</p>
           </div>
           <div class="content">
               <h2>Hello ${user.name},</h2>
-              <p>You requested a password reset for your Legal Estate account.</p>
+              <p>You requested a password reset for your Litigious account.</p>
               
               <a href="${resetUrl}" class="button">Reset Your Password</a>
               
@@ -182,18 +182,18 @@ class EmailService {
               <p>If you continue to have problems, please contact your administrator.</p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Legal Estate Management System. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} Litigious Management System. All rights reserved.</p>
           </div>
       </body>
       </html>
     `;
 
     const text = `
-      Password Reset Request - Legal Estate
+      Password Reset Request - Litigious
       
       Hello ${user.name},
       
-      You requested a password reset for your Legal Estate account.
+      You requested a password reset for your Litigious account.
       
       Please click the following link to reset your password:
       ${resetUrl}
@@ -204,7 +204,7 @@ class EmailService {
       Your current password remains unchanged until you set a new one.
       
       Best regards,
-      Legal Estate Team
+      Litigious Team
     `;
 
     return await this.sendEmail({
@@ -218,7 +218,7 @@ class EmailService {
   async sendEmailVerification(user, verificationToken) {
     const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
     
-    const subject = 'Verify Your Email - Legal Estate';
+    const subject = 'Verify Your Email - Litigious';
     const html = `
       <!DOCTYPE html>
       <html>
@@ -237,7 +237,7 @@ class EmailService {
       <body>
           <div class="header">
               <h1>Verify Your Email</h1>
-              <p>Legal Estate Management System</p>
+              <p>Litigious Management System</p>
           </div>
           <div class="content">
               <h2>Hello ${user.name},</h2>
@@ -250,19 +250,19 @@ class EmailService {
                   ${verificationUrl}
               </p>
               
-              <p>Once verified, you'll have full access to all features of the Legal Estate Management System.</p>
+              <p>Once verified, you'll have full access to all features of the Litigious Management System.</p>
               
               <p>If you didn't create this account, please ignore this email.</p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Legal Estate Management System. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} Litigious Management System. All rights reserved.</p>
           </div>
       </body>
       </html>
     `;
 
     const text = `
-      Email Verification - Legal Estate
+      Email Verification - Litigious
       
       Hello ${user.name},
       
@@ -271,12 +271,12 @@ class EmailService {
       Click the following link to verify your email:
       ${verificationUrl}
       
-      Once verified, you'll have full access to all features of the Legal Estate Management System.
+      Once verified, you'll have full access to all features of the Litigious Management System.
       
       If you didn't create this account, please ignore this email.
       
       Best regards,
-      Legal Estate Team
+      Litigious Team
     `;
 
     return await this.sendEmail({
@@ -288,7 +288,7 @@ class EmailService {
   }
 
   async sendLoginAlert(user, loginDetails) {
-    const subject = 'New Login Alert - Legal Estate';
+    const subject = 'New Login Alert - Litigious';
     const html = `
       <!DOCTYPE html>
       <html>
@@ -307,11 +307,11 @@ class EmailService {
       <body>
           <div class="header">
               <h1>Login Alert</h1>
-              <p>Legal Estate Management System</p>
+              <p>Litigious Management System</p>
           </div>
           <div class="content">
               <h2>Hello ${user.name},</h2>
-              <p>We detected a new login to your Legal Estate account.</p>
+              <p>We detected a new login to your Litigious account.</p>
               
               <div class="details">
                   <h3>Login Details:</h3>
@@ -330,7 +330,7 @@ class EmailService {
               <p>Stay secure!</p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Legal Estate Management System. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} Litigious Management System. All rights reserved.</p>
           </div>
       </body>
       </html>

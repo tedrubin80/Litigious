@@ -55,6 +55,7 @@ const webrtcRoutes = require('./src/routes/webrtcRoutes');
 const meetingRoutes = require('./src/routes/meetingRoutes');
 const apiV1Routes = require('./src/routes/api-v1');
 const monitoringRoutes = require('./src/routes/monitoring');
+const importRoutes = require('./src/routes/import');
 const activitiesRoutes = require('./src/routes/activities');
 const errorMonitor = require('./src/services/errorMonitor');
 const AuthUtils = require('./src/lib/authUtils');
@@ -127,7 +128,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     explorer: true,
     customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'LegalEstate API Documentation',
+    customSiteTitle: 'Litigious API Documentation',
     swaggerOptions: {
       persistAuthorization: true,
       displayRequestDuration: true,
@@ -190,6 +191,7 @@ app.use('/api/zoom', endpointLimiters.api, zoomRoutes);
 app.use('/api/webrtc', endpointLimiters.api, webrtcRoutes);
 app.use('/api/activities', endpointLimiters.api, activitiesRoutes);
 app.use('/api/monitoring', endpointLimiters.api, monitoringRoutes);
+app.use('/api/import', endpointLimiters.api, importRoutes);
 
 // Meeting room direct access routes (should be after API routes but before catch-all)
 app.use('/', meetingRoutes);
@@ -197,7 +199,7 @@ app.use('/', meetingRoutes);
 // Basic routes
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Legal Estate Backend API',
+    message: 'Litigious Backend API',
     status: 'running',
     version: '1.0.0',
     security: {
@@ -372,7 +374,7 @@ app.use(errorMonitor.middleware());
 
 // Start server
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Legal Estate Backend running on port ${PORT}`);
+  console.log(`🚀 Litigious API running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔐 API Endpoints available on port ${PORT}`);
   console.log(`🔗 Socket.IO server ready for real-time collaboration`);

@@ -1,9 +1,12 @@
 {
-  "name": "legal-estate",
+  "name": "litigious",
   "version": "1.0.0",
-  "description": "Legal Estate Management System",
+  "description": "Litigious — open source legal practice management",
+  "license": "MIT",
   "private": true,
   "scripts": {
+    "setup": "npm run install:all && node scripts/setup-env.js",
+    "db:push": "cd backend && npx prisma db push",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
