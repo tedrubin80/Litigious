@@ -13,6 +13,9 @@ const bcrypt = require('bcryptjs');
 
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
+const { purgeUserUploads } = require('../src/lib/demoCleanup');
+const { getAppName } = require('../src/lib/brand');
+
 const prisma = new PrismaClient();
 
 const DEMO_PASSWORD = process.env.DEMO_SEED_PASSWORD || 'DemoShow2026!';
@@ -28,6 +31,11 @@ const monthsAgo = (n) => {
 const hash = (value) => bcrypt.hash(value, 10);
 
 async function clearDemoData() {
+  const uploadCleanup = purgeUserUploads();
+  if (uploadCleanup.totalRemoved > 0) {
+    console.log(`🧹 Removed ${uploadCleanup.totalRemoved} user-uploaded file(s) from disk`);
+  }
+
   const deleters = [
     () => prisma.activity.deleteMany(),
     () => prisma.caseActivity?.deleteMany?.() ?? Promise.resolve(),
@@ -66,7 +74,7 @@ async function ensureDemoUploads() {
   if (!fs.existsSync(samplePath)) {
     fs.writeFileSync(
       samplePath,
-      'DEMO POLICE REPORT\n\nCase: Chen v. National Freight Lines\nDate of incident: sample data for LegalEstate showcase.\n',
+      `DEMO POLICE REPORT\n\nCase: Chen v. National Freight Lines\nDate of incident: sample data for ${getAppName()} showcase.\n`,
       'utf8'
     );
   }

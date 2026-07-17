@@ -1,8 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-const MARKETING_URL = import.meta.env.VITE_MARKETING_URL || 'https://litigiousweb.vercel.app';
-const DOCS_URL = import.meta.env.VITE_DOCS_URL || 'https://github.com/tedrubin80/Litigious/blob/main/docs/INSTALL.md';
+import brand from '../../config/brand';
+import BrandWordmark from '../Brand/BrandWordmark';
 
 const AppLanding = () => (
   <div
@@ -14,15 +11,15 @@ const AppLanding = () => (
       style={{ borderColor: 'oklch(0.88 0.005 60)', backgroundColor: 'oklch(0.97 0.005 60)' }}
     >
       <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-        <span className="text-base font-bold tracking-tight">Litigious</span>
+        <BrandWordmark className="text-base font-bold tracking-tight normal-case" style={{ color: 'oklch(0.18 0.008 60)' }} />
         <a
-          href={MARKETING_URL}
+          href={brand.marketingUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm"
           style={{ color: 'oklch(0.45 0.006 60)' }}
         >
-          About Litigious
+          About {brand.appName}
         </a>
       </div>
     </nav>
@@ -39,7 +36,7 @@ const AppLanding = () => (
           Sign in to your workspace
         </h1>
         <p className="text-base mb-10 max-w-lg" style={{ color: 'oklch(0.45 0.006 60)' }}>
-          This is the application entry point for a Litigious deployment. Staff and clients use
+          This is the application entry point for a {brand.appName} deployment. Staff and clients use
           separate portals.
         </p>
 
@@ -73,13 +70,13 @@ const AppLanding = () => (
           <p className="font-medium">Self-hosting?</p>
           <ul className="space-y-2" style={{ color: 'oklch(0.45 0.006 60)' }}>
             <li>
-              <a href={DOCS_URL} className="underline" target="_blank" rel="noopener noreferrer">
+              <a href={brand.docsUrl} className="underline" target="_blank" rel="noopener noreferrer">
                 Installation guide
               </a>
               {' '}— Docker, local dev, Railway, and Vercel
             </li>
             <li>
-              <a href={MARKETING_URL} className="underline" target="_blank" rel="noopener noreferrer">
+              <a href={brand.marketingUrl} className="underline" target="_blank" rel="noopener noreferrer">
                 Product overview
               </a>
               {' '}— features, modules, and demo
@@ -93,7 +90,7 @@ const AppLanding = () => (
       className="border-t py-6 text-center text-xs"
       style={{ borderColor: 'oklch(0.88 0.005 60)', color: 'oklch(0.45 0.006 60)' }}
     >
-      &copy; {new Date().getFullYear()} Litigious — MIT licensed open source
+      &copy; {new Date().getFullYear()} {brand.appName} — MIT licensed open source
     </footer>
   </div>
 );

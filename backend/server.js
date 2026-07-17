@@ -7,6 +7,8 @@ const swaggerSpec = require('./src/config/swagger');
 const http = require('http');
 const realtimeCollaborationService = require('./src/services/RealtimeCollaborationService');
 const { initErrorTracking, registerErrorHandler } = require('./src/lib/errorTracking');
+const { getAppName } = require('./src/lib/brand');
+const { startDemoResetScheduler } = require('./src/services/demoResetScheduler');
 require('dotenv').config();
 
 const app = express();
@@ -374,7 +376,7 @@ app.use(errorMonitor.middleware());
 
 // Start server
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Litigious API running on port ${PORT}`);
+  console.log(`🚀 ${getAppName()} API running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔐 API Endpoints available on port ${PORT}`);
   console.log(`🔗 Socket.IO server ready for real-time collaboration`);
@@ -382,4 +384,5 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`🔒 HTTPS Support: ${process.env.FORCE_HTTPS === 'true' ? 'Required' : 'Optional with HTTP fallback'}`);
   console.log(`🌍 CORS Origins: HTTPS/HTTP both supported for SSL fallback`);
   console.log(`📋 Activity Tracking: Comprehensive system ready for production`);
+  startDemoResetScheduler();
 });

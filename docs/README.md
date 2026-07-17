@@ -8,7 +8,8 @@
 | [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md) | DevOps | Railway monorepo deploy |
 | [DEPLOY_VERCEL.md](DEPLOY_VERCEL.md) | DevOps | Vercel (marketing + frontend) |
 | [IMPORT_MIGRATION.md](IMPORT_MIGRATION.md) | Admins | LMS import adapters |
-| [DEMO_DATA.md](DEMO_DATA.md) | Everyone | Demo seed credentials |
+| [BRAND.md](BRAND.md) | Developers / resellers | White-label env vars |
+| [DEMO_DATA.md](DEMO_DATA.md) | Everyone | Demo seed & auto-reset |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributors | How to contribute |
 
 ## Public sites

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon } from '../Icons';
+import BrandWordmark from '../Brand/BrandWordmark';
+import brand from '../../config/brand';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -52,9 +54,7 @@ const Login = () => {
       >
         <div className="max-w-sm w-full">
           <div className="mb-10">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'oklch(0.55 0.006 60)' }}>
-              Litigious
-            </p>
+            <BrandWordmark className="mb-3" />
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'oklch(0.18 0.008 60)' }}>
               Two-factor authentication
             </h1>
@@ -130,14 +130,12 @@ const Login = () => {
     >
       <div className="max-w-sm w-full">
         <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'oklch(0.55 0.006 60)' }}>
-            Litigious
-          </p>
+          <BrandWordmark className="mb-3" />
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'oklch(0.18 0.008 60)' }}>
             Sign in
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'oklch(0.55 0.006 60)' }}>
-            Legal Practice Management
+            {brand.tagline}
           </p>
         </div>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import BrandWordmark from '../Brand/BrandWordmark';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -36,9 +36,7 @@ const AdminLogin = () => {
       <div className="max-w-sm w-full">
         {/* Wordmark */}
         <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'oklch(0.55 0.006 60)' }}>
-            Litigious
-          </p>
+          <BrandWordmark className="mb-3" />
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'oklch(0.18 0.008 60)' }}>
             Admin Portal
           </h1>

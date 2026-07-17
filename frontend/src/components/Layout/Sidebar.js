@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import brand from '../../config/brand';
 import {
   XMarkIcon,
   HomeIcon,
@@ -72,7 +73,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     <div className="flex flex-col flex-grow overflow-y-auto bg-[oklch(0.96_0.004_60)] border-r border-[oklch(0.88_0.005_60)]">
       {/* Wordmark */}
       <div className="flex-shrink-0 px-4 py-5">
-        <span className="text-[oklch(0.18_0.008_60)] font-bold text-base tracking-tight">Litigious</span>
+        <span className="text-[oklch(0.18_0.008_60)] font-bold text-base tracking-tight">{brand.appName}</span>
       </div>
 
       {/* Nav groups */}

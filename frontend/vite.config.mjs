@@ -65,6 +65,8 @@ export default defineConfig(({ mode }) => {
       'process.env.REACT_APP_SOCKET_URL': defineEnv('VITE_SOCKET_URL', 'REACT_APP_SOCKET_URL', 'http://localhost:3001'),
       'process.env.REACT_APP_NAME': defineEnv('VITE_APP_NAME', 'REACT_APP_NAME', 'Litigious'),
       'process.env.REACT_APP_VERSION': defineEnv('VITE_APP_VERSION', 'REACT_APP_VERSION', '1.0.0'),
+      'process.env.REACT_APP_MARKETING_URL': defineEnv('VITE_MARKETING_URL', 'REACT_APP_MARKETING_URL', ''),
+      'process.env.REACT_APP_DOCS_URL': defineEnv('VITE_DOCS_URL', 'REACT_APP_DOCS_URL', ''),
     },
   };
 });

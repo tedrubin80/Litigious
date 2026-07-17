@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useAuth } from '../../contexts/AuthContext';
+import brand from '../../config/brand';
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,7 +31,7 @@ const Layout = () => {
     if (path.startsWith('/app/cases/') && path !== '/app/cases') return 'Case Details';
     if (path.startsWith('/app/clients/') && path !== '/app/clients') return 'Client Details';
 
-    return titles[path] || 'Litigious';
+    return titles[path] || brand.appName;
   };
 
   return (
