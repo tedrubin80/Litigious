@@ -40,6 +40,13 @@ const startDemoResetScheduler = () => {
 
   console.log(`⏱️  Demo auto-reset enabled — every ${hours} hour(s)`);
 
+  // Seed on startup so fresh deploys have demo data without a manual step
+  setTimeout(() => {
+    runDemoReset().catch((error) => {
+      console.error('Demo startup reset failed:', error.message);
+    });
+  }, 5000);
+
   intervalHandle = setInterval(() => {
     runDemoReset().catch((error) => {
       console.error('Demo auto-reset failed:', error.message);

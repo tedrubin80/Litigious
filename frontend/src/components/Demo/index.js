@@ -1,5 +1,6 @@
 // Demo Components Export
 export { default as DemoWrapper, useDemoContext } from './DemoWrapper';
+export { default as DemoCredentialsHint } from './DemoCredentialsHint';
 export { default as DemoBanner } from './DemoBanner';
 export { default as DemoWatermark } from './DemoWatermark';
 export { default as VirtualTour } from './VirtualTour';

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchWithAuth } from '../../utils/authStorage';
+import brand from '../../config/brand';
 import WebRTCMeeting from './WebRTCMeeting';
 
 const WebRTCMeetingRoom = () => {
@@ -154,7 +155,7 @@ const WebRTCMeetingRoom = () => {
             <p className="text-gray-600">{meeting.description}</p>
             <div className="mt-4 text-sm text-gray-500">
               <p>Scheduled: {meetingStartTime.toLocaleDateString()} at {meetingStartTime.toLocaleTimeString()}</p>
-              <p>Host: {meeting.hostName || 'LegalEstate'}</p>
+              <p>Host: {meeting.hostName || brand.appName}</p>
             </div>
           </div>
 

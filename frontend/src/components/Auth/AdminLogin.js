@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import brand from '../../config/brand';
 import BrandWordmark from '../Brand/BrandWordmark';
+import DemoCredentialsHint from '../Demo/DemoCredentialsHint';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -132,6 +135,12 @@ const AdminLogin = () => {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+
+        {brand.demoMode && (
+          <div className="mt-8">
+            <DemoCredentialsHint compact />
+          </div>
+        )}
       </div>
     </div>
   );

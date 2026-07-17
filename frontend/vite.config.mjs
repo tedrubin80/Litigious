@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => {
       'process.env.NODE_ENV': JSON.stringify(mode),
       'process.env.REACT_APP_API_URL': defineEnv('VITE_API_URL', 'REACT_APP_API_URL', '/api'),
       'process.env.REACT_APP_API_TIMEOUT': defineEnv('VITE_API_TIMEOUT', 'REACT_APP_API_TIMEOUT', '10000'),
-      'process.env.REACT_APP_DEMO_MODE': defineEnv('VITE_DEMO_MODE', 'REACT_APP_DEMO_MODE', 'false'),
+      'process.env.REACT_APP_DEMO_MODE': defineEnv('VITE_DEMO_MODE', 'REACT_APP_DEMO_MODE', 'true'),
       'process.env.REACT_APP_PACKAGE_TYPE': defineEnv('VITE_PACKAGE_TYPE', 'REACT_APP_PACKAGE_TYPE', ''),
       'process.env.REACT_APP_SOCKET_URL': defineEnv('VITE_SOCKET_URL', 'REACT_APP_SOCKET_URL', 'http://localhost:3001'),
       'process.env.REACT_APP_NAME': defineEnv('VITE_APP_NAME', 'REACT_APP_NAME', 'Litigious'),

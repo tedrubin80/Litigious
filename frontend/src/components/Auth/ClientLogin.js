@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchWithAuth } from '../../utils/authStorage';
+import brand from '../../config/brand';
+import DemoCredentialsHint from '../Demo/DemoCredentialsHint';
 
 const ClientLogin = () => {
   const navigate = useNavigate();
@@ -314,9 +316,15 @@ const ClientLogin = () => {
           </div>
 
           <div className="mt-4 text-center">
-            <p className="text-xs text-gray-500">
-              Need help? Contact your attorney for assistance accessing your portal.
-            </p>
+            {brand.demoMode ? (
+              <div className="mt-6 text-left">
+                <DemoCredentialsHint compact />
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500">
+                Need help? Contact your attorney for assistance accessing your portal.
+              </p>
+            )}
           </div>
         </form>
       </div>

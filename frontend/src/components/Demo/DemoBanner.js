@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
+import { isDemoMode } from '../../config/demo';
 
 const DemoBanner = () => {
   const [isVisible, setIsVisible] = useState(true);
 
-  // Check if we're in demo mode
-  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true' ||
-                     process.env.REACT_APP_PACKAGE_TYPE === 'demo';
-
-  if (!isDemoMode || !isVisible) {
+  if (!isDemoMode() || !isVisible) {
     return null;
   }
 
@@ -22,21 +19,11 @@ const DemoBanner = () => {
               </svg>
             </span>
             <p className="ml-3 font-medium text-white truncate">
-              <span className="md:hidden">
-                🎭 Demo Mode - Data resets daily
-              </span>
+              <span className="md:hidden">Demo — sample data resets every 24h</span>
               <span className="hidden md:inline">
-                🎭 <strong>Live Demo:</strong> This is a demonstration environment. Data resets daily at 3:00 AM UTC.
+                <strong>Live demo:</strong> Shared accounts and sample data. Uploads and changes reset every 24 hours.
               </span>
             </p>
-          </div>
-          <div className="order-3 mt-2 flex-shrink-0 w-full sm:order-2 sm:mt-0 sm:w-auto">
-            <a
-              href="mailto:support@litigious.online?subject=Request%20Full%20Demo"
-              className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-600 bg-white hover:bg-blue-50 transition-colors"
-            >
-              Request Full Demo
-            </a>
           </div>
           <div className="order-2 flex-shrink-0 sm:order-3 sm:ml-3">
             <button

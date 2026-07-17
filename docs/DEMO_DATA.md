@@ -1,5 +1,7 @@
 # Demo / Showcase Data
 
+**This repo defaults to demo mode.** Backend auto-reset and frontend demo UI are enabled in `.env.example`. To run a real deployment, see **[GOING_TO_PRODUCTION.md](GOING_TO_PRODUCTION.md)**.
+
 Load realistic sample data for sales demos, dashboards, charts, and the client portal.
 
 ## Run manually
@@ -30,9 +32,7 @@ DEMO_SEED_PASSWORD='YourDemoPass123!' npm run seed:demo
 
 ## Auto-reset on hosted demo
 
-For a public demo (e.g. litigious.online), enable automatic cleanup so visitors’ uploads and data do not persist.
-
-Add to **`backend/.env`**:
+For a public demo (e.g. litigious.online), the **defaults in `.env.example`** already enable automatic cleanup:
 
 ```bash
 DEMO_MODE=true
@@ -50,7 +50,7 @@ DEMO_RESET_INTERVAL_HOURS=24
 When the API server starts with these flags, it will:
 
 1. Purge user upload directories (keep `uploads/demo/`)
-2. Re-run the demo seed (DB reset + sample data)
+2. Re-run the demo seed (DB reset + sample data) **on startup and on each interval**
 
 **Manual reset anytime:** `npm run seed:demo`
 

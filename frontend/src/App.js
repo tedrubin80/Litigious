@@ -29,6 +29,7 @@ import Reports from './components/Reports/Reports';
 import Settings from './components/Settings/Settings';
 import WebRTCMeetingList from './components/WebRTC/WebRTCMeetingList';
 import LexMachinaResearch from './components/LexMachina/LexMachinaResearch';
+import DemoWrapper from './components/Demo/DemoWrapper';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -76,6 +77,7 @@ function App() {
         <RealTimeProvider>
           <ToastProvider position="top-right" maxToasts={5}>
             <AuthProvider>
+            <DemoWrapper>
             <Router>
             <Routes>
               {/* Public Routes */}
@@ -154,6 +156,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
             </Router>
+            </DemoWrapper>
             </AuthProvider>
           </ToastProvider>
         </RealTimeProvider>

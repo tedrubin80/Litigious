@@ -1,53 +1,85 @@
 # Deploy on Vercel
 
-Vercel fits two parts of Litigious:
+Litigious is a **monorepo** with two Vercel-friendly surfaces:
 
-| Project | Folder | Type |
+| Service | Folder | Role |
 |---------|--------|------|
-| Marketing site | `website/` | Static HTML |
-| Frontend app | `frontend/` | Vite SPA (API on Railway/other) |
+| `marketing` | `website/` | Static product site |
+| `app` | `frontend/` | Vite SPA (staff + client portal) |
 
-The **backend must run elsewhere** (Railway, VPS, Docker) — Vercel hosts static/edge frontends only.
+The **API + PostgreSQL** stack should run on **Railway**, a VPS, or Docker — not Vercel (Prisma, uploads, Socket.IO, demo auto-reset).
 
-## Marketing site (`website/`)
+## One Vercel project (recommended) — `vercel.json` Services
 
-1. Vercel → **Add New Project** → import repo
-2. **Root Directory**: `website`
-3. Framework: **Other** (static)
-4. Build command: *(leave empty)*
-5. Output: `.` or leave default
+Vercel **requires a root [`vercel.json`](../vercel.json)** when deploying multiple services from one repo.
 
-`website/vercel.json` is included for headers and routing.
+1. Vercel → **Add New Project** → import this repo
+2. **Root Directory**: leave as **`.`** (repository root)
+3. Vercel reads [`vercel.json`](../vercel.json) at the repo root and builds both services
+4. Set environment variables (Project → Settings → Environment Variables):
 
-Custom domain example: `litigious.dev` → marketing  
-Demo link in site points to your hosted app.
-
-## Frontend app (`frontend/`)
-
-1. **Root Directory**: `frontend`
-2. Framework: **Vite**
-3. Build: `npm run build`
-4. Output: `dist`
-5. Environment:
+**App service (`frontend/`)**
 
 ```bash
-VITE_API_URL=https://your-api.example.com/api
-VITE_MARKETING_URL=https://your-marketing.example.com
+VITE_API_URL=/api
+VITE_DEMO_MODE=true
+VITE_APP_NAME=Litigious
+VITE_MARKETING_URL=https://your-marketing-domain.example.com
 ```
 
-6. Rewrites (in `frontend/vercel.json`): SPA fallback to `index.html`
+**Backend proxy** — edit the `/api` rewrite in root `vercel.json` and replace `REPLACE_WITH_YOUR_API_HOST` with your Railway (or other) API host, e.g. `litigious-api.up.railway.app` (no `https://` in the placeholder line — the file includes it).
 
-### API proxy (optional)
+### Default routing (host-based)
 
-For same-origin `/api`, use Vercel rewrites to your Railway backend — see `frontend/vercel.json` comments.
+| Host | Service |
+|------|---------|
+| `litigious.online`, `app.*` | `app` (React SPA) |
+| Everything else (e.g. `litigiousweb.vercel.app`) | `marketing` (static site) |
+
+Adjust the `has.host` rules in root `vercel.json` for your domains.
+
+### Local dev with all services
+
+```bash
+vercel dev
+# or offline:
+vercel dev -L
+```
+
+## Alternative: two separate Vercel projects
+
+If you prefer one project per folder (older pattern), create **two** Vercel projects:
+
+| Project | Root Directory | Config |
+|---------|----------------|--------|
+| Marketing | `website` | [`website/vercel.json`](../website/vercel.json) |
+| App | `frontend` | [`frontend/vercel.json`](../frontend/vercel.json) |
+
+Set `VITE_API_URL` to your full API URL (e.g. `https://api.example.com/api`) when not using the root `/api` proxy.
 
 ## Recommended DNS layout
 
 ```
-www.example.com     →  website/   (Vercel project 1)
-app.example.com     →  frontend/  (Vercel project 2)
-api.example.com     →  backend/   (Railway)
+marketing.example.com   →  Vercel (marketing service or website project)
+app.example.com         →  Vercel (app service or frontend project)
+api.example.com         →  Railway / VPS (backend/)
 ```
+
+Example mapping for Litigious:
+
+```
+litigiousweb.vercel.app → marketing
+litigious.online        → app
+api.litigious.online    → Railway backend
+```
+
+## Backend on Railway
+
+See [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md). After the API is live, point the root `vercel.json` `/api` rewrite at that host so the SPA can use `VITE_API_URL=/api`.
+
+## Going to production
+
+Disable demo UI and auto-reset — see [GOING_TO_PRODUCTION.md](GOING_TO_PRODUCTION.md).
 
 ## Related
 

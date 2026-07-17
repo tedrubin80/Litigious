@@ -1,6 +1,9 @@
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, pdf, Image } from '@react-pdf/renderer';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import brand from '../config/brand';
+
+const productName = brand.appName;
 
 // Styles for PDF documents
 const styles = StyleSheet.create({
@@ -125,7 +128,7 @@ export const CaseReportDocument = ({ caseData, clientData, activities }) => (
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.lawFirmHeader}>
-        <Text style={styles.lawFirmName}>LegalEstate</Text>
+        <Text style={styles.lawFirmName}>{productName}</Text>
         <Text style={styles.lawFirmAddress}>123 Justice Avenue, Legal City, LC 12345</Text>
         <Text style={styles.lawFirmAddress}>Phone: (555) 123-4567 | Email: info@legaleagle.com</Text>
       </View>
@@ -213,7 +216,7 @@ export const CaseReportDocument = ({ caseData, clientData, activities }) => (
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Text>This report was generated automatically by LegalEstate</Text>
+        <Text>This report was generated automatically by {productName}</Text>
         <Text>Confidential and Privileged Attorney-Client Communication</Text>
       </View>
     </Page>
@@ -226,7 +229,7 @@ export const InvoiceDocument = ({ invoiceData, clientData, lineItems }) => (
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.lawFirmHeader}>
-        <Text style={styles.lawFirmName}>LegalEstate</Text>
+        <Text style={styles.lawFirmName}>{productName}</Text>
         <Text style={styles.lawFirmAddress}>123 Justice Avenue, Legal City, LC 12345</Text>
         <Text style={styles.lawFirmAddress}>Phone: (555) 123-4567 | Email: billing@legaleagle.com</Text>
       </View>
@@ -338,7 +341,7 @@ export const ContractDocument = ({ contractData, clientData, terms }) => (
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.lawFirmHeader}>
-        <Text style={styles.lawFirmName}>LegalEstate</Text>
+        <Text style={styles.lawFirmName}>{productName}</Text>
         <Text style={styles.lawFirmAddress}>123 Justice Avenue, Legal City, LC 12345</Text>
       </View>
 
@@ -352,7 +355,7 @@ export const ContractDocument = ({ contractData, clientData, terms }) => (
       <View style={styles.section}>
         <Text style={styles.subtitle}>PARTIES</Text>
         <Text style={styles.text}>
-          This agreement is entered into between LegalEstate ("Attorney") and {clientData?.name || '[CLIENT NAME]'} ("Client").
+          This agreement is entered into between {productName} ("Attorney") and {clientData?.name || '[CLIENT NAME]'} ("Client").
         </Text>
       </View>
 
@@ -486,7 +489,7 @@ export class PDFService {
     
     // Add title
     doc.setFontSize(20);
-    doc.text('LegalEstate Analytics Report', 20, 30);
+    doc.text(`${productName} Analytics Report`, 20, 30);
     
     // Add generation date
     doc.setFontSize(10);

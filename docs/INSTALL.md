@@ -18,6 +18,8 @@ npm run setup
 
 This installs dependencies in root, `backend/`, and `frontend/`, and copies `.env.example` files if `.env` is missing.
 
+**Demo mode is the default** (`DEMO_MODE=true`, `VITE_DEMO_MODE=true`). The API seeds sample data on startup and resets every 24 hours. For a production firm, follow **[GOING_TO_PRODUCTION.md](GOING_TO_PRODUCTION.md)**.
+
 ## Environment
 
 ### Backend (`backend/.env`)

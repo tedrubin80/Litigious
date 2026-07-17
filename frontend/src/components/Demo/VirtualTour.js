@@ -46,7 +46,7 @@ const VirtualTour = ({ isActive, onClose, onComplete }) => {
   const tourSteps = [
     {
       id: 'welcome',
-      title: '🎭 Welcome to Legal Estate Demo',
+      title: '🎭 Welcome to the Litigious Demo',
       content: 'This virtual walkthrough will show you the key features of our Legal Practice Management System, including powerful AI integrations.',
       position: 'center',
       highlight: null,

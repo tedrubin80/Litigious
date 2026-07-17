@@ -139,6 +139,8 @@ Staff use **Staff login**; clients use **Client portal**.
 
 ## Quick start
 
+> **Demo by default:** `.env.example` enables demo UI and auto-reset. For a production firm, see **[docs/GOING_TO_PRODUCTION.md](docs/GOING_TO_PRODUCTION.md)**.
+
 ```bash
 git clone https://github.com/tedrubin80/Litigious.git
 cd Litigious
@@ -149,11 +151,10 @@ Edit `backend/.env` — set `DATABASE_URL`, `JWT_SECRET`, and `SESSION_SECRET` (
 
 ```bash
 npm run db:push
-npm run seed:demo    # optional — demo users and sample cases
-npm run dev          # API on :3001, app on :5173
+npm run dev          # API on :3001, app on :5173 — demo seed runs when API starts
 ```
 
-Open **http://localhost:5173** and sign in with the demo admin account above.
+Open **http://localhost:5173** and sign in with the demo admin account below (or wait ~5s after API start for auto-seed).
 
 ---
 
@@ -274,9 +275,11 @@ Litigious is a **monorepo**: PostgreSQL + `backend/` + `frontend/`.
 
 Config-as-code included:
 
+- [`vercel.json`](vercel.json) — **root** multi-service config (marketing + app); required for one Vercel project
 - `backend/railway.toml` — API build, healthcheck, Prisma migrate on deploy
 - `frontend/railway.toml` — Vite build + static serve
-- `frontend/vercel.json` — SPA rewrites
+- `frontend/vercel.json` — standalone frontend project (optional)
+- `website/vercel.json` — standalone marketing project (optional)
 - `docker-compose.yml` — Postgres + API + web
 
 To publish a **Railway template** for one-click deploys: deploy once, then **Generate Template from Project** — see [deploy/railway/TEMPLATE.md](deploy/railway/TEMPLATE.md).
@@ -405,6 +408,7 @@ Backend tests expect a configured `DATABASE_URL` in the test environment. CI run
 | [DEPLOY_RAILWAY.md](docs/DEPLOY_RAILWAY.md) | Railway monorepo deploy |
 | [DEPLOY_VERCEL.md](docs/DEPLOY_VERCEL.md) | Vercel frontend deploy |
 | [DEMO_DATA.md](docs/DEMO_DATA.md) | Demo seed contents |
+| [GOING_TO_PRODUCTION.md](docs/GOING_TO_PRODUCTION.md) | Disable demo mode for a real firm |
 | [CONTRIBUTING.md](docs/CONTRIBUTING.md) | How to contribute |
 | [docs/README.md](docs/README.md) | Full doc index |
 

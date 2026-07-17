@@ -29,3 +29,4 @@ for (const [example, target] of pairs) {
 }
 
 console.log('\nNext: edit backend/.env (DATABASE_URL, JWT_SECRET, SESSION_SECRET), then npm run db:push');
+console.log('Demo mode is ON by default — see docs/GOING_TO_PRODUCTION.md to run a production firm.');

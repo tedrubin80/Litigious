@@ -35,6 +35,9 @@ services:
       PORT: 3001
       FRONTEND_URL: http://localhost:3000
       ALLOWED_ORIGINS: http://localhost:3000
+      DEMO_MODE: ${DEMO_MODE:-true}
+      DEMO_AUTO_RESET: ${DEMO_AUTO_RESET:-true}
+      DEMO_RESET_INTERVAL_HOURS: ${DEMO_RESET_INTERVAL_HOURS:-24}
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,6 +53,7 @@ services:
       - "3000:3000"
     environment:
       VITE_API_URL: http://localhost:3001/api
+      VITE_DEMO_MODE: ${VITE_DEMO_MODE:-true}
     depends_on:
       - backend
     networks:

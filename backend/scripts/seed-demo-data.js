@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * LegalEstate demo/showcase dataset.
+ * Litigious demo/showcase dataset.
  * Resets core tables and loads realistic sample data for dashboards, charts, and client portal demos.
  *
  * Usage: npm run seed:demo (from backend/)
@@ -37,8 +37,17 @@ async function clearDemoData() {
   }
 
   const deleters = [
-    () => prisma.activity.deleteMany(),
+    () => prisma.importExternalMapping?.deleteMany?.() ?? Promise.resolve(),
+    () => prisma.importJob?.deleteMany?.() ?? Promise.resolve(),
+    () => prisma.notification?.deleteMany?.() ?? Promise.resolve(),
     () => prisma.caseActivity?.deleteMany?.() ?? Promise.resolve(),
+    () => prisma.activity.deleteMany(),
+    () => prisma.caseStatusHistory?.deleteMany?.() ?? Promise.resolve(),
+    () => prisma.caseDeadline?.deleteMany?.() ?? Promise.resolve(),
+    () => prisma.caseValue?.deleteMany?.() ?? Promise.resolve(),
+    () => prisma.caseWorkflowStep?.deleteMany?.() ?? Promise.resolve(),
+    () => prisma.caseTemplateTask?.deleteMany?.() ?? Promise.resolve(),
+    () => prisma.caseTemplate?.deleteMany?.() ?? Promise.resolve(),
     () => prisma.task.deleteMany(),
     () => prisma.document.deleteMany(),
     () => prisma.timeEntry.deleteMany(),
@@ -86,7 +95,7 @@ async function seedDemoData() {
     throw new Error('DATABASE_URL is required. Copy backend/.env.example to backend/.env first.');
   }
 
-  console.log('🌱 Seeding LegalEstate demo/showcase data...');
+  console.log(`🌱 Seeding ${getAppName()} demo/showcase data...`);
   await clearDemoData();
   console.log('✅ Cleared existing demo tables');
 
@@ -440,7 +449,7 @@ async function seedDemoData() {
         entityId,
         userId,
         ipAddress: '127.0.0.1',
-        userAgent: 'LegalEstate Demo Seed'
+        userAgent: `${getAppName()} Demo Seed`
       }
     });
   }

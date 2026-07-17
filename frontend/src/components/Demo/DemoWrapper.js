@@ -1,6 +1,8 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
+import { isDemoMode } from '../../config/demo';
 import DemoBanner from './DemoBanner';
 import DemoWatermark from './DemoWatermark';
+import DemoCredentialsHint from './DemoCredentialsHint';
 import VirtualTour from './VirtualTour';
 import FeatureHighlight from './FeatureHighlight';
 
@@ -23,7 +25,7 @@ const DemoWrapper = ({ children }) => {
   const [tourCompleted, setTourCompleted] = useState(false);
 
   // Check if we're in demo mode
-  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true' ||
+  const demoActive = isDemoMode() ||
                      process.env.REACT_APP_PACKAGE_TYPE === 'demo' ||
                      localStorage.getItem('demoMode') === 'true';
 
@@ -34,7 +36,7 @@ const DemoWrapper = ({ children }) => {
     setTourCompleted(completed || skipped);
 
     // Auto-show tour on first visit in demo mode
-    if (isDemoMode && !completed && !skipped) {
+    if (demoActive && !completed && !skipped) {
       const hasSeenTour = sessionStorage.getItem('hasSeenVirtualTour');
       if (!hasSeenTour) {
         // Small delay to let the page load first
@@ -45,7 +47,7 @@ const DemoWrapper = ({ children }) => {
         return () => clearTimeout(timer);
       }
     }
-  }, [isDemoMode]);
+  }, [demoActive]);
 
   const resetTour = () => {
     localStorage.removeItem('demoTourCompleted');
@@ -61,7 +63,7 @@ const DemoWrapper = ({ children }) => {
   };
 
   const contextValue = {
-    isDemoMode,
+    isDemoMode: demoActive,
     showTour,
     setShowTour,
     showHighlight,
@@ -71,7 +73,7 @@ const DemoWrapper = ({ children }) => {
   };
 
   // If not in demo mode, just render children
-  if (!isDemoMode) {
+  if (!demoActive) {
     return <>{children}</>;
   }
 
@@ -142,18 +144,12 @@ const DemoFloatingControls = ({ onStartTour, tourCompleted }) => {
               </svg>
               {tourCompleted ? 'Replay Tour' : 'Start Tour'}
             </button>
-            <a
-              href="mailto:support@litigious.online?subject=Demo%20Request"
-              className="w-full flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Request Full Access
-            </a>
+            <div className="pt-2 border-t border-gray-100">
+              <DemoCredentialsHint compact />
+            </div>
             <div className="pt-2 border-t border-gray-100">
               <p className="text-xs text-gray-500">
-                Data resets daily at 3:00 AM UTC
+                Sample data resets every 24 hours
               </p>
             </div>
           </div>
