@@ -2,7 +2,7 @@
   "name": "litigious-backend",
   "version": "1.0.0",
   "description": "Litigious API server",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

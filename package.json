@@ -2,7 +2,7 @@
   "name": "litigious",
   "version": "1.0.0",
   "description": "Litigious — open source legal practice management",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "private": true,
   "scripts": {
     "setup": "npm run install:all && node scripts/setup-env.js",

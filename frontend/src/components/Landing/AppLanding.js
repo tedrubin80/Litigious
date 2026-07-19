@@ -115,7 +115,7 @@ const AppLanding = () => (
       className="border-t py-6 text-center text-xs"
       style={{ borderColor: 'oklch(0.88 0.005 60)', color: 'oklch(0.45 0.006 60)' }}
     >
-      &copy; {new Date().getFullYear()} {brand.appName} — MIT licensed open source
+      &copy; {new Date().getFullYear()} {brand.appName} — AGPL-3.0 open source
     </footer>
   </div>
 );

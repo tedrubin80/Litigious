@@ -94,4 +94,4 @@ See [DEMO_DATA.md](DEMO_DATA.md) for what the seed includes.
 
 ## License
 
-Litigious is open source under the [MIT License](../LICENSE).
+Litigious is open source under the [GNU Affero General Public License v3.0](../LICENSE).

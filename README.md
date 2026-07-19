@@ -4,7 +4,7 @@
 
 Manage cases, clients, documents, time, billing, and a secure client portal — with optional AI-assisted workflows and **migration from Clio, MyCase, and PracticePanther**.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-green)](https://nodejs.org)
 [![Live demo](https://img.shields.io/badge/demo-litigious.online-brightgreen)](https://litigious.online)
 
@@ -38,7 +38,7 @@ Manage cases, clients, documents, time, billing, and a secure client portal — 
 
 Litigious is a **self-hostable legal management system (LMS)** — the kind of platform firms use for case tracking, client records, document storage, billable time, and client-facing portals.
 
-It is released under the **MIT license**, so you can run it for your firm, fork it, customize it, or white-label it for clients without licensing fees to us.
+It is released under the **AGPL-3.0 license**, so you can run it for your firm, fork it, customize it, or white-label it for clients without licensing fees to us — with the obligation to share source for network-deployed modifications.
 
 **Built with:** React · Vite · Tailwind · Node.js · Express · PostgreSQL · Prisma · JWT · Socket.IO
 
@@ -49,7 +49,7 @@ It is released under the **MIT license**, so you can run it for your firm, fork 
 | You are… | Litigious gives you… |
 |----------|----------------------|
 | **A law firm** | Case lifecycle, time tracking, documents, client portal, dashboards |
-| **A legal tech consultant / reseller** | MIT codebase, modular features, deploy under your brand and domain |
+| **A legal tech consultant / reseller** | AGPL-3.0 codebase, modular features, deploy under your brand and domain |
 | **A developer** | Documented install, Railway/Vercel/Docker configs, Prisma schema, REST API |
 | **A firm switching LMS** | Import pipeline from Clio, MyCase, PracticePanther (API + CSV), always dry-run first |
 
@@ -328,7 +328,7 @@ Litigious/
 ├── deploy/                  # Dockerfiles, Railway template notes
 ├── scripts/                 # Setup & test helpers
 ├── docker-compose.yml
-├── LICENSE                  # MIT
+├── LICENSE                  # AGPL-3.0
 └── README.md                # You are here
 ```
 
@@ -423,7 +423,7 @@ Contributions are welcome — bug fixes, docs, adapters for new LMS sources, and
 3. Run tests locally
 4. Open a pull request
 
-By contributing, you agree your work is licensed under the [MIT License](LICENSE).
+By contributing, you agree your work is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 
 See **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)**.
 
@@ -431,9 +431,9 @@ See **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)**.
 
 ## License
 
-**MIT License** — Copyright (c) 2026 Ted Rubin.
+**GNU Affero General Public License v3.0** — Copyright (c) 2026 Ted Rubin.
 
-Free to use, modify, and distribute. See [LICENSE](LICENSE).
+Free to use, modify, and distribute under AGPL-3.0. Network use of modified versions requires offering the corresponding source. See [LICENSE](LICENSE).
 
 ---
 
